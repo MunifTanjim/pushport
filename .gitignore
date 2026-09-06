@@ -1,0 +1,20 @@
+# SDD scratch workspace (subagent-driven-development)
+/.superpowers/
+
+# Go
+/pushport
+/bin/
+*.db
+*.db-shm
+*.db-wal
+
+# design + SDD process docs (kept local, out of history)
+/docs/superpowers/
+
+# pnpm workspace: node deps live under the root store; keep only pnpm-lock.yaml
+node_modules/
+
+# admin console: Vite build output (keep the placeholder so go:embed
+# compiles before the first frontend build)
+internal/console/dist/*
+!internal/console/dist/.gitkeep

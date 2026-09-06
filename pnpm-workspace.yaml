@@ -1,0 +1,6 @@
+packages:
+  - console
+  - docs
+
+onlyBuiltDependencies:
+  - esbuild

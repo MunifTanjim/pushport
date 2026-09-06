@@ -1,0 +1,13 @@
+{
+  "name": "pushport",
+  "private": true,
+  "packageManager": "pnpm@10.17.0",
+  "scripts": {
+    "console:dev": "pnpm --filter console dev",
+    "console:build": "pnpm --filter console build",
+    "console:preview": "pnpm --filter console preview",
+    "docs:dev": "pnpm --filter docs dev",
+    "docs:build": "pnpm --filter docs build",
+    "docs:preview": "pnpm --filter docs preview"
+  }
+}
