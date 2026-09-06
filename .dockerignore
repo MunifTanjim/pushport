@@ -1,0 +1,19 @@
+# VCS + local tooling
+.git
+.zcode
+.superpowers
+docs
+
+# build artifacts / local state
+bin
+pushport
+*.db
+*.db-shm
+*.db-wal
+
+# console deps (not needed in the image). internal/console/dist is deliberately
+# NOT ignored: the console is built before the docker build (see
+# .github/workflows/docker-build-push.yml) and must reach the build context so
+# the Go binary can embed it.
+node_modules
+console/node_modules
