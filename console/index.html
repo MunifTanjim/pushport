@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%logo-mark.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pushport console</title>
+    <!-- Apply the theme before first paint to avoid a flash of the wrong theme.
+         Explicit choice (localStorage) wins, else follow the OS. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("pp:theme");
+          var dark = stored
+            ? stored === "dark"
+            : window.matchMedia("(prefers-color-scheme: dark)").matches;
+          var el = document.documentElement;
+          el.classList.toggle("dark", dark);
+          el.style.colorScheme = dark ? "dark" : "light";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

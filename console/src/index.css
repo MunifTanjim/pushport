@@ -1,0 +1,178 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: `dark:` applies when .dark is on an ancestor (html),
+   instead of Tailwind v4's default prefers-color-scheme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-canvas: #ffd500;
+  --color-ink: #111111;
+  --color-paper: #fffef2;
+  --color-pink: #ff5d8f;
+  --color-cyan: #00c2ff;
+  --color-lime: #7cff6b;
+  --color-grape: #a26bfa;
+  --color-tang: #ff8a00;
+
+  --font-display: "Archivo Black", "Space Grotesk", system-ui, sans-serif;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, "SF Mono", monospace;
+}
+
+html {
+  color-scheme: light;
+}
+
+/* Dark theme: keep `canvas` (the yellow accent) as-is; flip the surface/text/
+   border tokens. Utilities like bg-paper / text-ink / border-ink compile to
+   var(--color-*), so overriding the vars cascades to most of the UI. Bright
+   accents (pink/cyan/lime/grape/tang + yellow canvas) stay put and keep their
+   dark #111 text via explicit classes in the components. */
+html.dark {
+  color-scheme: dark;
+}
+.dark {
+  --color-ink: #f2f0e9;
+  --color-paper: #1e1e25;
+}
+
+body {
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(
+    rgba(17, 17, 17, 0.13) 1.2px,
+    transparent 1.2px
+  );
+  background-size: 22px 22px;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.dark body {
+  background-color: #15151a;
+  background-image: radial-gradient(
+    rgba(242, 240, 233, 0.1) 1.2px,
+    transparent 1.2px
+  );
+}
+
+::selection {
+  background: var(--color-pink);
+  color: var(--color-ink);
+}
+
+/* Neo-brutalist primitives: chunky ink borders with hard offset shadows. */
+.nb {
+  border: 3px solid var(--color-ink);
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+}
+.nb-sm {
+  border: 2px solid var(--color-ink);
+  box-shadow: 3px 3px 0 0 var(--color-ink);
+}
+.nb-hover {
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.nb-hover:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 0 var(--color-ink);
+}
+.nb-press:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--color-ink);
+}
+
+/* The app header is a dark bar in BOTH themes (ink in light, #23232b in dark),
+   so its neobrutalist buttons need a light border + shadow to be visible — the
+   default ink ones vanish on the dark bar in light mode. #f2f0e9 is the same
+   light value ink already flips to in dark mode, so both themes match. */
+.pp-topbar .nb,
+.pp-topbar .nb-sm {
+  border-color: #f2f0e9;
+}
+.pp-topbar .nb {
+  box-shadow: 4px 4px 0 0 #f2f0e9;
+}
+.pp-topbar .nb-sm {
+  box-shadow: 3px 3px 0 0 #f2f0e9;
+}
+.pp-topbar .nb-hover:hover {
+  box-shadow: 7px 7px 0 0 #f2f0e9;
+}
+.pp-topbar .nb-press:active {
+  box-shadow: 1px 1px 0 0 #f2f0e9;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+@keyframes pop-in {
+  from {
+    transform: scale(0.94) translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes shake {
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  80% {
+    transform: translateX(4px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-6px);
+  }
+  40%,
+  60% {
+    transform: translateX(6px);
+  }
+}
+@keyframes toast-in {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

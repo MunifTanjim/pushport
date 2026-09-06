@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 140" width="520" height="140" fill="none" role="img" aria-label="pushport">
+  <!-- mark -->
+  <g transform="translate(6,10) scale(0.95)">
+    <rect x="11" y="11" width="103" height="103" rx="22" fill="#111111"/>
+    <rect x="6" y="6" width="103" height="103" rx="22" fill="#ffd500" stroke="#111111" stroke-width="5"/>
+    <path d="M92 28 L20 57 L49 63 L70 95 Z" transform="translate(5,5)" fill="#111111"/>
+    <path d="M92 28 L49 63 L70 95 Z" fill="#ff5d8f" stroke="#111111" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M92 28 L20 57 L49 63 Z" fill="#fffef2" stroke="#111111" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M92 28 L49 63" fill="none" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <!-- wordmark -->
+  <text x="150" y="90" font-family="'Archivo Black','Space Grotesk',system-ui,sans-serif"
+        font-size="62" font-weight="900" letter-spacing="-2">
+    <tspan fill="#111111">push</tspan><tspan fill="#ff5d8f">port</tspan>
+  </text>
+</svg>
