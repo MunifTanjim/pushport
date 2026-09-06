@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "name": "docs",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "@fontsource/archivo-black": "^5.2.5",
+    "@fontsource/space-grotesk": "^5.2.5",
+    "@fontsource/space-mono": "^5.2.5",
+    "vitepress": "^1.6.4"
+  }
+}

@@ -1,0 +1,703 @@
+/* PushPort docs theme: neo-brutalist skin mirroring the admin console
+   (console/src/index.css). */
+
+:root {
+  --color-canvas: #ffd500;
+  --color-ink: #111111;
+  --color-paper: #fffef2;
+  --color-pink: #ff5d8f;
+  --color-cyan: #00c2ff;
+  --color-lime: #7cff6b;
+  --color-grape: #a26bfa;
+  --color-tang: #ff8a00;
+
+  /* VitePress token remap. */
+  --vp-c-bg: var(--color-paper);
+  --vp-c-bg-alt: var(--color-paper);
+  --vp-c-bg-elv: #ffffff;
+  --vp-c-bg-soft: #ffffff;
+  --vp-c-divider: var(--color-ink);
+  --vp-c-border: var(--color-ink);
+  --vp-c-gutter: var(--color-ink);
+  --vp-c-text-1: var(--color-ink);
+  --vp-c-text-2: rgba(17, 17, 17, 0.72);
+  --vp-c-text-3: rgba(17, 17, 17, 0.56);
+  --vp-c-brand-1: var(--color-ink);
+  --vp-c-brand-2: var(--color-ink);
+  --vp-c-brand-3: var(--color-ink);
+  --vp-c-brand-soft: rgba(255, 213, 0, 0.45);
+  --vp-c-black: var(--color-ink);
+
+  --vp-nav-bg-color: var(--color-ink);
+  --vp-sidebar-bg-color: var(--color-paper);
+
+  --vp-font-family-base: "Space Grotesk", system-ui, sans-serif;
+  --vp-font-family-mono: "Space Mono", ui-monospace, "SF Mono", monospace;
+
+  --vp-code-color: var(--color-ink);
+  --vp-code-bg: var(--color-canvas);
+  --vp-code-block-bg: #ffffff;
+  --vp-code-copy-code-bg: #ffffff;
+  --vp-code-copy-code-hover-bg: var(--color-canvas);
+  --vp-code-copy-code-border-color: var(--color-ink);
+  --vp-code-tab-bg: #ffffff;
+  --vp-code-tab-divider: var(--color-ink);
+  --vp-code-tab-text-color: rgba(17, 17, 17, 0.6);
+  --vp-code-tab-active-text-color: var(--color-ink);
+  --vp-code-tab-active-bar-color: var(--color-pink);
+
+  --vp-custom-block-info-bg: var(--color-cyan);
+  --vp-custom-block-info-text: var(--color-ink);
+  --vp-custom-block-info-code-bg: rgba(17, 17, 17, 0.08);
+  --vp-custom-block-tip-bg: var(--color-lime);
+  --vp-custom-block-tip-text: var(--color-ink);
+  --vp-custom-block-tip-code-bg: rgba(17, 17, 17, 0.08);
+  --vp-custom-block-warning-bg: var(--color-tang);
+  --vp-custom-block-warning-text: var(--color-ink);
+  --vp-custom-block-warning-code-bg: rgba(17, 17, 17, 0.08);
+  --vp-custom-block-danger-bg: var(--color-pink);
+  --vp-custom-block-danger-text: var(--color-ink);
+  --vp-custom-block-danger-code-bg: rgba(17, 17, 17, 0.08);
+  --vp-custom-block-details-bg: var(--color-paper);
+  --vp-custom-block-details-text: var(--color-ink);
+
+  --vp-local-search-bg: var(--color-paper);
+  --vp-local-search-highlight-bg: var(--color-pink);
+  --vp-local-search-highlight-text: var(--color-ink);
+  --vp-local-search-selected-bg: var(--color-canvas);
+  --vp-local-search-selected-text: var(--color-ink);
+
+  --vp-home-hero-name-color: var(--color-ink);
+  --vp-home-hero-name-background: none;
+  --vp-home-hero-image-background-image: none;
+  --vp-home-hero-image-filter: none;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(
+    rgba(17, 17, 17, 0.13) 1.2px,
+    transparent 1.2px
+  );
+  background-size: 22px 22px;
+}
+
+::selection {
+  background: var(--color-pink);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* neo-brutalist primitives */
+
+.nb {
+  border: 3px solid var(--color-ink);
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+}
+
+.nb-hover {
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.nb-hover:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 0 var(--color-ink);
+}
+
+.nb-press:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--color-ink);
+}
+
+/* navbar */
+
+.VPNavBar .wrapper,
+.VPNavBar:not(.home) .wrapper,
+.VPNavBar.home .wrapper {
+  background-color: var(--color-ink);
+  border-bottom: 3px solid var(--color-ink);
+}
+
+.VPNavBarTitle .title {
+  color: var(--color-canvas);
+  font-family: "Archivo Black", "Space Grotesk", system-ui, sans-serif;
+  text-transform: lowercase;
+  letter-spacing: -0.02em;
+}
+
+/* Scoped VitePress rules (attr selectors) outrank single-class selectors, so
+   overrides below carry an extra ancestor for specificity. */
+/* Nav pills: the shadow is a fixed light #f2f0e9 because the ink bar is dark in
+   both themes. */
+.VPNavBar .VPNavBarMenu .VPNavBarMenuLink {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  margin: 0 8px;
+  padding: 0 14px;
+  color: var(--color-canvas);
+  font-weight: 700;
+  font-size: 14px;
+  border: 2px solid #f2f0e9;
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 0 #f2f0e9;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.VPNavBar .VPNavBarMenu .VPNavBarMenuLink:hover {
+  color: var(--color-canvas);
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 0 #f2f0e9;
+}
+.VPNavBar .VPNavBarMenu .VPNavBarMenuLink.active {
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  border-color: #f2f0e9;
+  box-shadow: 3px 3px 0 0 #f2f0e9;
+}
+.VPNavBar .VPNavBarMenu .VPNavBarMenuLink.active:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 0 #f2f0e9;
+}
+.VPNavBar .VPNavBarMenu .VPNavBarMenuLink.vp-external-link-icon::after {
+  color: currentColor;
+}
+
+.VPNavBar .VPSocialLink,
+.VPNavBar .social-links a {
+  color: var(--color-canvas);
+}
+
+/* Social links in the "⋯" flyout sit on the paper dropdown, not the ink bar, so
+   use ink instead of canvas-yellow. */
+.VPNavBarExtra .VPMenu .VPSocialLink,
+.VPNavBarExtra .VPMenu .social-links a {
+  color: var(--color-ink);
+}
+
+/* VitePress's hover color (--vp-c-text-1) is dark in light mode, invisible on
+   the dark navbar. Pink reads on both the dark bar and the dropdown, both themes. */
+.VPNavBar .VPSocialLink:hover,
+.VPNavBar .social-links a:hover,
+.VPNavBarExtra .VPMenu .VPSocialLink:hover,
+.VPNavBarExtra .VPMenu .social-links a:hover {
+  color: var(--color-pink);
+}
+
+.VPNavBarHamburger .container span {
+  background: var(--color-canvas);
+}
+
+/* VitePress colors the "⋯" trigger with --vp-c-text (dark on the dark navbar in
+   light mode), so force it canvas-yellow; :hover recolors it too, so cover both. */
+.VPNavBar .VPNavBarExtra .button,
+.VPNavBar .VPNavBarExtra .button .icon,
+.VPNavBar .VPNavBarExtra:hover .button,
+.VPNavBar .VPNavBarExtra:hover .button .icon {
+  color: var(--color-canvas);
+  opacity: 1;
+}
+
+.VPNavBarExtra .body {
+  border: 3px solid var(--color-ink);
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+  background: var(--color-paper);
+  border-radius: 12px;
+}
+
+/* This theme remaps --vp-c-black to ink, which feeds the switch knob; ink flips
+   light in dark mode, hiding the moon icon. Pin the knob per mode instead. */
+.VPSwitchAppearance .check {
+  background-color: #ffffff;
+}
+.dark .VPSwitchAppearance .check {
+  background-color: #15151a;
+}
+
+/* sidebar */
+
+.VPSidebar {
+  border-right: 3px solid var(--color-ink);
+}
+
+.VPSidebar .group > .item > .link > .text {
+  font-family: "Archivo Black", "Space Grotesk", system-ui, sans-serif;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  font-size: 13px !important;
+}
+
+.VPSidebarItem.is-active > .item {
+  /* Negative margins offset the 2px border + padding so the active row's label
+     stays aligned with its inactive siblings. */
+  margin: -2px -8px !important;
+  padding: 0 6px !important;
+  background-color: var(--color-canvas) !important;
+  border: 2px solid var(--color-ink) !important;
+  border-radius: 8px !important;
+  box-shadow: 3px 3px 0 0 var(--color-ink) !important;
+}
+.VPSidebarItem.is-active > .item .text {
+  font-weight: 700 !important;
+  color: var(--color-ink) !important;
+}
+
+/* doc content */
+
+.VPDoc .content-container {
+  background: var(--color-paper);
+  border: 3px solid var(--color-ink);
+  border-radius: 16px;
+  box-shadow: 6px 6px 0 0 var(--color-ink);
+  padding: 28px 36px 48px;
+  margin: 24px auto;
+}
+
+.VPDoc.has-aside .content-container {
+  max-width: 728px;
+}
+
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3,
+.vp-doc h4 {
+  font-family: "Archivo Black", "Space Grotesk", system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.vp-doc h1 {
+  font-size: 34px;
+}
+
+.vp-doc h2 {
+  border-top: 3px solid var(--color-ink);
+  padding-top: 24px;
+}
+
+.vp-doc a {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+.vp-doc :not(pre) > code {
+  border: 2px solid var(--color-ink);
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.85em;
+}
+
+.vp-doc div[class*="language-"] {
+  border: 3px solid var(--color-ink);
+  border-radius: 10px;
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+}
+
+.vp-doc div[class*="language-"] > button.copy {
+  border: 2px solid var(--color-ink);
+  border-radius: 6px;
+}
+
+.vp-doc [class*="language-"] code {
+  font-family: "Space Mono", ui-monospace, monospace;
+}
+
+.vp-doc table {
+  border: 3px solid var(--color-ink);
+  border-radius: 0;
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+  background: #ffffff;
+}
+
+.vp-doc th,
+.vp-doc td {
+  border: 2px solid var(--color-ink);
+}
+
+.vp-doc th {
+  background: var(--color-canvas);
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 12.5px;
+  letter-spacing: 0.05em;
+}
+
+.vp-doc tr:nth-child(2n) td {
+  background: var(--color-paper);
+}
+
+.vp-doc .custom-block {
+  border: 3px solid var(--color-ink);
+  border-radius: 10px;
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+  font-weight: 500;
+}
+
+.vp-doc .custom-block-title {
+  font-family: "Archivo Black", "Space Grotesk", system-ui, sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 13.5px;
+}
+
+/* VitePress's default link accents (--vp-c-tip-1, …) aren't remapped here and
+   read poorly on the bright block backgrounds; inherit the block's text color. */
+.vp-doc .custom-block.info a,
+.vp-doc .custom-block.tip a,
+.vp-doc .custom-block.warning a,
+.vp-doc .custom-block.danger a,
+.vp-doc .custom-block.info a:hover,
+.vp-doc .custom-block.tip a:hover,
+.vp-doc .custom-block.warning a:hover,
+.vp-doc .custom-block.danger a:hover {
+  color: inherit;
+}
+
+.vp-doc .pager-link {
+  border: 3px solid var(--color-ink);
+  box-shadow: 3px 3px 0 0 var(--color-ink);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.vp-doc .pager-link:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 0 var(--color-ink);
+}
+
+.VPDocAsideOutline .outline-title {
+  font-family: "Archivo Black", "Space Grotesk", system-ui, sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 12.5px;
+}
+
+/* footer */
+
+.VPFooter {
+  border-top: 3px solid var(--color-ink) !important;
+  background: rgba(255, 254, 242, 0.8);
+}
+
+.VPFooter .message,
+.VPFooter .copyright {
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 12px;
+  color: rgba(17, 17, 17, 0.6);
+}
+
+/* home page */
+
+.VPHome {
+  padding-bottom: 32px;
+}
+
+/* VitePress centers .image-src with a max-width cap + translate, leaving dead
+   space; cancel those so it fills .image-container, sized by the container. */
+.VPHero .image-container {
+  width: 320px;
+  height: 320px;
+}
+.VPHero .VPImage.image-src {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  transform: none;
+  object-fit: contain;
+}
+@media (max-width: 639px) {
+  .VPHero .image-container {
+    width: 240px;
+    height: 240px;
+  }
+}
+
+/* Stacked hero (<960px): VitePress's negative margins offset the glow we
+   disabled, distorting spacing. Reset them; doubled .VPHero outranks VitePress's
+   scoped rule. --hero-pad-y is the single top/bottom knob. */
+@media (max-width: 959px) {
+  .VPHero.VPHero {
+    --hero-pad-y: 32px;
+    padding-top: calc(var(--vp-nav-height) + var(--vp-layout-top-height, 0px) + var(--hero-pad-y));
+    padding-bottom: var(--hero-pad-y);
+  }
+  .VPHero .image {
+    margin: 0;
+  }
+  .VPHero .container {
+    row-gap: 16px;
+  }
+}
+
+.VPHome .name,
+.VPHome .name-text {
+  font-family: "Archivo Black", "Space Grotesk", system-ui, sans-serif;
+  text-transform: lowercase;
+}
+
+.VPHero .name {
+  text-shadow: 5px 5px 0 var(--color-pink);
+}
+
+.VPFeature {
+  border: 3px solid var(--color-ink) !important;
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+  border-radius: 12px;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.VPFeature.link:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 0 var(--color-ink);
+  border-color: var(--color-ink) !important;
+}
+
+.VPFeature .title {
+  font-family: "Archivo Black", "Space Grotesk", system-ui, sans-serif;
+  font-weight: 400;
+}
+
+/* box-sizing is border-box, so set an explicit outer size; padding alone would
+   crush the 24px glyph. */
+.VPFeature .box img.VPImage {
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+  background: var(--color-canvas);
+  border: 2px solid var(--color-ink);
+  border-radius: 8px;
+}
+
+.VPFeature .link-text {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.VPButton {
+  border: 3px solid var(--color-ink) !important;
+  border-radius: 10px !important;
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+  font-weight: 700 !important;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.VPButton.brand {
+  background: var(--color-canvas) !important;
+  color: var(--color-ink) !important;
+}
+.VPButton.alt {
+  background: #ffffff !important;
+  color: var(--color-ink) !important;
+}
+.VPButton:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 0 var(--color-ink);
+}
+.VPButton:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--color-ink);
+}
+
+/* homepage flow */
+.flow {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  margin: 24px 0 8px;
+}
+.flow-step {
+  flex: 1;
+  display: block;
+  padding: 22px 20px;
+  border: 3px solid var(--color-ink);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+  text-decoration: none !important;
+  color: inherit !important;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.flow-step:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 0 var(--color-ink);
+}
+.flow-step svg {
+  width: 28px;
+  height: 28px;
+  color: var(--color-ink);
+}
+.flow-step h3 {
+  margin: 12px 0 6px;
+  border: 0;
+  padding: 0;
+  font-family: "Archivo Black", "Space Grotesk", system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+.flow-step p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(17, 17, 17, 0.72);
+}
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+@media (max-width: 640px) {
+  .flow {
+    flex-direction: column;
+  }
+  .flow-arrow {
+    justify-content: center;
+    transform: rotate(90deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .VPButton,
+  .VPFeature,
+  .flow-step,
+  .vp-doc .pager-link {
+    transition: none !important;
+  }
+}
+
+/* dark mode: VitePress toggles `.dark` on <html>. Ink/borders/text flip to
+   light and surfaces go near-black; --color-canvas stays yellow on purpose as
+   the accent, so bright surfaces need dark text (--nb-on-accent). */
+
+html.dark {
+  color-scheme: dark;
+}
+
+.dark {
+  --color-ink: #f2f0e9;
+  --color-paper: #1e1e25;
+  --nb-on-accent: #15151a; /* text for vivid accent surfaces */
+
+  /* VitePress token remap */
+  --vp-c-bg: #15151a;
+  --vp-c-bg-alt: #1e1e25;
+  --vp-c-bg-elv: #1e1e25;
+  --vp-c-bg-soft: #1e1e25;
+  --vp-c-divider: var(--color-ink);
+  --vp-c-border: var(--color-ink);
+  --vp-c-gutter: var(--color-ink);
+  --vp-c-text-1: var(--color-ink);
+  --vp-c-text-2: rgba(242, 240, 233, 0.72);
+  --vp-c-text-3: rgba(242, 240, 233, 0.55);
+  --vp-c-brand-1: var(--color-ink);
+  --vp-c-brand-2: var(--color-ink);
+  --vp-c-brand-3: var(--color-ink);
+  --vp-c-brand-soft: rgba(255, 213, 0, 0.28);
+
+  --vp-nav-bg-color: #0f0f12;
+  --vp-sidebar-bg-color: #1e1e25;
+
+  --vp-code-block-bg: #16161c;
+  --vp-code-copy-code-bg: #16161c;
+  --vp-code-copy-code-hover-bg: var(--color-canvas);
+  --vp-code-tab-bg: #16161c;
+  --vp-code-tab-text-color: rgba(242, 240, 233, 0.6);
+  --vp-code-tab-active-text-color: var(--color-ink);
+
+  /* bright accent block backgrounds need dark text */
+  --vp-custom-block-info-text: var(--nb-on-accent);
+  --vp-custom-block-tip-text: var(--nb-on-accent);
+  --vp-custom-block-warning-text: var(--nb-on-accent);
+  --vp-custom-block-danger-text: var(--nb-on-accent);
+  --vp-custom-block-details-bg: #1e1e25;
+  --vp-custom-block-details-text: var(--color-ink);
+
+  --vp-local-search-bg: #1e1e25;
+  --vp-local-search-highlight-text: var(--nb-on-accent);
+  --vp-local-search-selected-text: var(--nb-on-accent);
+
+  --vp-home-hero-name-color: var(--color-ink);
+}
+
+.dark body {
+  background-color: #15151a;
+  background-image: radial-gradient(
+    rgba(242, 240, 233, 0.1) 1.2px,
+    transparent 1.2px
+  );
+}
+
+/* ink is light now, so pin the navbar bg dark */
+.dark .VPNavBar .wrapper,
+.dark .VPNavBar:not(.home) .wrapper,
+.dark .VPNavBar.home .wrapper {
+  background-color: #0f0f12;
+}
+.dark .VPNavBar .VPNavBarMenuLink.active {
+  color: var(--nb-on-accent);
+}
+
+.dark .VPSidebarItem.is-active > .item .text {
+  color: var(--nb-on-accent) !important;
+}
+
+.dark .vp-doc :not(pre) > code {
+  color: var(--nb-on-accent);
+}
+
+.dark .vp-doc table {
+  background: #1e1e25;
+}
+.dark .vp-doc tr:nth-child(2n) td {
+  background: #17171d;
+}
+.dark .vp-doc th {
+  color: var(--nb-on-accent);
+}
+
+/* footer */
+.dark .VPFooter {
+  background: rgba(15, 15, 18, 0.8);
+}
+.dark .VPFooter .message,
+.dark .VPFooter .copyright {
+  color: rgba(242, 240, 233, 0.6);
+}
+
+.dark .VPButton.brand {
+  color: var(--nb-on-accent) !important;
+}
+.dark .VPButton.alt {
+  background: #1e1e25 !important;
+  color: var(--color-ink) !important;
+}
+
+.dark .flow-step {
+  background: #1e1e25;
+}
+.dark .flow-step p {
+  color: rgba(242, 240, 233, 0.72);
+}

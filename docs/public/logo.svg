@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1.25 -1.25 120 120" width="120" height="120" role="img" aria-label="PushPort">
+  <!-- tile hard shadow -->
+  <rect x="11" y="11" width="103" height="103" rx="22" fill="#111111"/>
+  <!-- tile -->
+  <rect x="6" y="6" width="103" height="103" rx="22" fill="#ffd500" stroke="#111111" stroke-width="5"/>
+  <!-- paper plane: hard shadow -->
+  <path d="M92 28 L20 57 L49 63 L70 95 Z" transform="translate(5,5)" fill="#111111"/>
+  <!-- near wing -->
+  <path d="M92 28 L49 63 L70 95 Z" fill="#ff5d8f" stroke="#111111" stroke-width="5" stroke-linejoin="round"/>
+  <!-- far wing -->
+  <path d="M92 28 L20 57 L49 63 Z" fill="#fffef2" stroke="#111111" stroke-width="5" stroke-linejoin="round"/>
+  <!-- center spine -->
+  <path d="M92 28 L49 63" fill="none" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+</svg>
