@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Register instance</title>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #111111;
+    --canvas: #ffd500;
+    --paper: #fffef2;
+    --pink: #ff5d8f;
+    --lime: #7cff6b;
+    --tang: #ff8a00;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    color: var(--ink);
+    background-color: var(--canvas);
+    background-image: radial-gradient(rgba(17, 17, 17, 0.13) 1.2px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+  ::selection { background: var(--pink); color: var(--ink); }
+  .card {
+    width: 100%;
+    max-width: 30rem;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 18px;
+    box-shadow: 8px 8px 0 0 var(--ink);
+    padding: 2rem;
+  }
+  h1 {
+    margin: 0 0 0.75rem;
+    font-family: "Archivo Black", "Space Grotesk", sans-serif;
+    font-weight: 400;
+    font-size: 1.9rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-transform: lowercase;
+    text-shadow: 3px 3px 0 var(--pink);
+  }
+  .app { margin: 0 0 1.5rem; font-size: 0.9rem; }
+  .chip {
+    display: inline-block;
+    background: var(--canvas);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    padding: 1px 7px;
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 0.85em;
+    word-break: break-all;
+  }
+  label { display: block; font-weight: 700; margin-bottom: 0.4rem; font-size: 0.9rem; }
+  input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font: inherit;
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+  }
+  input:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  .cf-turnstile { display: flex; justify-content: center; margin: 1rem 0; }
+  button {
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 0.7rem 1rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: lowercase;
+    color: var(--ink);
+    background: var(--canvas);
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    box-shadow: 4px 4px 0 0 var(--ink);
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  button:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 0 var(--ink); }
+  button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 0 var(--ink); }
+  button:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: 4px 4px 0 0 var(--ink); }
+  .note {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    box-shadow: 4px 4px 0 0 var(--ink);
+    font-weight: 500;
+  }
+  .note.success { background: var(--lime); }
+  .note.error { background: var(--tang); }
+  .note strong { display: block; font-family: "Archivo Black", sans-serif; font-weight: 400; text-transform: lowercase; }
+  .note .hint { display: block; font-size: 0.8rem; margin: 0.25rem 0 0.6rem; }
+  .note code {
+    display: block;
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 0.85rem;
+    word-break: break-all;
+  }
+  .note button { width: auto; margin-top: 0.6rem; padding: 0.35rem 0.9rem; font-size: 0.85rem; background: #fff; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>register an instance</h1>
+  <p class="app">app: <span class="chip">{{.AppID}}</span></p>
+  <form id="f">
+    <label for="label">Label</label>
+    <input id="label" type="text" name="label" placeholder="alice's homelab" required>
+    {{if .SiteKey}}<div class="cf-turnstile" data-sitekey="{{.SiteKey}}"></div>{{end}}
+    <button type="submit">register</button>
+  </form>
+  <div id="out"></div>
+</div>
+<script>
+document.getElementById('f').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var btn = this.querySelector('button');
+  var out = document.getElementById('out');
+  btn.disabled = true;
+  btn.textContent = 'registering…';
+  var token = (document.querySelector('[name="cf-turnstile-response"]') || {}).value || '';
+  try {
+    var res = await fetch({{.PostURL}}, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ label: document.getElementById('label').value, turnstile_token: token })
+    });
+    if (res.status === 201) {
+      var body = await res.json();
+      out.className = 'note success';
+      out.innerHTML = '<strong>your instance token</strong><span class="hint">Shown once; store it now.</span><code></code><button type="button">copy</button>';
+      out.querySelector('code').textContent = body.data.token;
+      out.querySelector('button').addEventListener('click', function () {
+        navigator.clipboard.writeText(body.data.token);
+        this.textContent = 'copied';
+      });
+      return;
+    }
+    out.className = 'note error';
+    out.textContent = 'Registration failed (' + res.status + '). Please retry.';
+  } catch (err) {
+    out.className = 'note error';
+    out.textContent = 'Registration failed. Please retry.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'register';
+  }
+});
+</script>
+</body>
+</html>

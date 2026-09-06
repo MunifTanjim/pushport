@@ -1,0 +1,28 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    queries: "internal/db/sqlc/queries.sql"
+    schema: "internal/db/migrations"
+    gen:
+      go:
+        package: "sqlc"
+        out: "internal/db/sqlc"
+        emit_interface: true
+        overrides:
+          - db_type: "TEXT"
+            nullable: true
+            go_type:
+              import: "github.com/MunifTanjim/pushport/internal/db/types"
+              package: "types"
+              type: "NullString"
+          - db_type: "INTEGER"
+            nullable: true
+            go_type:
+              import: "github.com/MunifTanjim/pushport/internal/db/types"
+              package: "types"
+              type: "NullInt64"
+          - column: "usage_counter.date"
+            go_type:
+              import: "github.com/MunifTanjim/pushport/internal/db/types"
+              package: "types"
+              type: "Date"
