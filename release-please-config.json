@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/refs/heads/main/schemas/config.json",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "include-v-in-tag": false,
+  "packages": {
+    ".": {
+      "release-type": "go",
+      "pull-request-title-pattern": "chore: release ${version}",
+      "exclude-paths": [
+        ".gitignore",
+        ".release-please-manifest.json",
+        "release-please-config.json",
+        "console",
+        "docs"
+      ]
+    }
+  }
+}
