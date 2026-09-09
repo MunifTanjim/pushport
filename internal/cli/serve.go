@@ -129,6 +129,11 @@ func runServe() error {
 		http.Redirect(w, r, "https://docs.pushport.muniftanjim.dev/install.sh", http.StatusFound)
 	})
 
+	// Land on the docs site when the relay root is opened in a browser.
+	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "https://docs.pushport.muniftanjim.dev", http.StatusFound)
+	})
+
 	admin := api.NewManagementHandler(apps, instances, database.Queries, cfg.AdminToken)
 	admin.OnCredsChange(dispatcher.Invalidate)
 	admin.OnRateConfigChange(func(string) { resolver.Flush() })
