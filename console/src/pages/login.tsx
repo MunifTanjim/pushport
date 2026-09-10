@@ -101,6 +101,26 @@ export default function Login() {
           only and never reaches anywhere but your pushport server.
         </p>
       </Card>
+
+      <footer className="mt-8 font-mono text-xs text-ink/60">
+        <a
+          href="https://docs.pushport.muniftanjim.dev"
+          target="_blank"
+          rel="noreferrer"
+          className="underline decoration-dotted underline-offset-4 hover:text-ink"
+        >
+          docs
+        </a>
+        <span className="mx-2">·</span>
+        <a
+          href="https://github.com/MunifTanjim/pushport"
+          target="_blank"
+          rel="noreferrer"
+          className="underline decoration-dotted underline-offset-4 hover:text-ink"
+        >
+          github
+        </a>
+      </footer>
     </div>
   );
 }
