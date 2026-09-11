@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import sri from "vite-plugin-sri-gen";
 
 // The console is a standalone SPA hosted on Cloudflare Pages at the site root;
 // it reaches the API cross-origin via VITE_API_BASE_URL. In dev the client uses
@@ -9,7 +10,8 @@ import tailwindcss from "@tailwindcss/vite";
 // same-origin and no CORS setup is needed locally.
 export default defineConfig({
   base: "/",
-  plugins: [react(), tailwindcss()],
+  // sri() last so it hashes the final emitted script/style tags.
+  plugins: [react(), tailwindcss(), sri()],
   server: {
     port: 3000,
     proxy: {
