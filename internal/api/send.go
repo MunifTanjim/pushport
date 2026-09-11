@@ -71,6 +71,19 @@ func (h *SendHandler) send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Read the body before charging quota; a 413/disconnect can't be refunded.
+	r.Body = http.MaxBytesReader(w, r.Body, h.maxBytes)
+	ciphertext, err := io.ReadAll(r.Body)
+	if err != nil {
+		var mbe *http.MaxBytesError
+		if errors.As(err, &mbe) {
+			SendError(w, r, ErrorPayloadTooLarge())
+		} else {
+			SendError(w, r, ErrorInternalServerError().WithCause(err))
+		}
+		return
+	}
+
 	if h.admit != nil {
 		planID := ""
 		if inst.UsagePlanID.Valid {
@@ -84,18 +97,6 @@ func (h *SendHandler) send(w http.ResponseWriter, r *http.Request) {
 			SendError(w, r, e)
 			return
 		}
-	}
-
-	r.Body = http.MaxBytesReader(w, r.Body, h.maxBytes)
-	ciphertext, err := io.ReadAll(r.Body)
-	if err != nil {
-		var mbe *http.MaxBytesError
-		if errors.As(err, &mbe) {
-			SendError(w, r, ErrorPayloadTooLarge())
-		} else {
-			SendError(w, r, ErrorInternalServerError().WithCause(err))
-		}
-		return
 	}
 
 	msg := transport.Message{
