@@ -85,12 +85,12 @@ function SettingsForm({ data }: { data: SettingsView }) {
 
   function submit(e: FormEvent) {
     e.preventDefault();
-    if (
-      [maxAttempts, authPerMin, authBurst].some(
-        (v) => v === "" || Number(v) < 0,
-      )
-    ) {
-      setError("limits must be non-negative numbers (0 = unlimited)");
+    if (maxAttempts === "" || Number(maxAttempts) < 1) {
+      setError("max attempts must be at least 1");
+      return;
+    }
+    if ([authPerMin, authBurst].some((v) => v === "" || Number(v) < 0)) {
+      setError("throttle limits must be non-negative numbers (0 = unlimited)");
       return;
     }
     if (!baseBackoff.trim() || !maxBackoff.trim()) {
