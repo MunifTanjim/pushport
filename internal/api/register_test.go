@@ -160,11 +160,18 @@ func TestRegisterPage(t *testing.T) {
 		t.Fatalf("page missing site key: %s", body)
 	}
 
-	if code, _ := getPage(t, srv, "/apps/"+privID+"/instances/register"); code != http.StatusForbidden {
-		t.Fatalf("private page: want 403 got %d", code)
+	// A private app and an unknown app must be indistinguishable, so the page
+	// can't be probed to learn which private apps exist.
+	privCode, privBody := getPage(t, srv, "/apps/"+privID+"/instances/register")
+	bogusCode, bogusBody := getPage(t, srv, "/apps/bogus/instances/register")
+	if privCode != http.StatusNotFound {
+		t.Fatalf("private page: want 404 got %d", privCode)
 	}
-	if code, _ := getPage(t, srv, "/apps/bogus/instances/register"); code != http.StatusNotFound {
-		t.Fatalf("unknown page: want 404 got %d", code)
+	if bogusCode != http.StatusNotFound {
+		t.Fatalf("unknown page: want 404 got %d", bogusCode)
+	}
+	if privBody != bogusBody {
+		t.Fatalf("private and unknown responses differ (existence oracle):\n private: %s\n unknown: %s", privBody, bogusBody)
 	}
 }
 

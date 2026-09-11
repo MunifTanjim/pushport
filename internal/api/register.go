@@ -79,16 +79,14 @@ func (h *InstanceRegistrationHandler) registerPage(w http.ResponseWriter, r *htt
 		}
 	}
 	pub, err := h.apps.IsPublic(ctx, appID)
-	if err != nil {
-		if errors.Is(err, db.ErrNotFound) {
-			SendError(w, r, ErrorNotFound().WithMessage("app not found"))
-			return
-		}
+	if err != nil && !errors.Is(err, db.ErrNotFound) {
 		SendError(w, r, ErrorInternalServerError().WithCause(err))
 		return
 	}
-	if !pub {
-		SendError(w, r, ErrorForbidden().WithMessage("self-registration disabled"))
+	// Uniform response for "no such app" and "app exists but private" so the
+	// page can't be probed to learn which private apps exist.
+	if err != nil || !pub {
+		SendError(w, r, ErrorNotFound().WithMessage("self-registration not available"))
 		return
 	}
 	// Turnstile is optional: when unconfigured, siteKey is empty and the form
