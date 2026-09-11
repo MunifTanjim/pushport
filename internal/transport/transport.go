@@ -54,3 +54,14 @@ func NormalizeEncoding(enc string) string {
 	}
 	return enc
 }
+
+// ValidEncoding reports whether enc is an accepted content encoding (empty is
+// allowed; NormalizeEncoding defaults it to aes128gcm).
+func ValidEncoding(enc string) bool {
+	switch enc {
+	case "", "aes128gcm", "aesgcm":
+		return true
+	default:
+		return false
+	}
+}

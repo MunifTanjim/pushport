@@ -81,6 +81,24 @@ func TestSendDeliveredReturns202(t *testing.T) {
 	}
 }
 
+func TestSendRejectsUnsupportedEncoding(t *testing.T) {
+	sender := &fakeSender{res: transport.Result{Delivered: true, StatusCode: 200}}
+	srv, key, endpoint := newSendFixture(t, sender)
+	req, _ := http.NewRequest("POST", srv.URL+"/push/"+endpoint, strings.NewReader("ciphertext"))
+	req.Header.Set("Authorization", "Bearer "+key)
+	req.Header.Set("Content-Encoding", "garbage")
+	resp, err := srv.Client().Do(req)
+	if err != nil {
+		t.Fatalf("do: %v", err)
+	}
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("want 400 for unsupported content-encoding, got %d", resp.StatusCode)
+	}
+	if sender.called {
+		t.Fatal("sender should not be called when encoding is rejected")
+	}
+}
+
 func TestSendUnauthorizedWithoutKey(t *testing.T) {
 	srv, _, endpoint := newSendFixture(t, &fakeSender{})
 	resp := post(t, srv, endpoint, "", "x")

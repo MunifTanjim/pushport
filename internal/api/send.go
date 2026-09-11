@@ -90,6 +90,12 @@ func (h *SendHandler) send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	encoding := r.Header.Get("Content-Encoding")
+	if !transport.ValidEncoding(encoding) {
+		SendError(w, r, ErrorBadRequest().WithMessage("unsupported content-encoding"))
+		return
+	}
+
 	if h.admit != nil {
 		planID := ""
 		if inst.UsagePlanID.Valid {
@@ -107,7 +113,7 @@ func (h *SendHandler) send(w http.ResponseWriter, r *http.Request) {
 
 	msg := transport.Message{
 		Ciphertext: ciphertext,
-		Encoding:   r.Header.Get("Content-Encoding"),
+		Encoding:   encoding,
 		TTL:        atoiDefault(r.Header.Get("TTL"), 0),
 		Urgency:    r.Header.Get("Urgency"),
 		Topic:      r.Header.Get("Topic"),
