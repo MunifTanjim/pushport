@@ -90,6 +90,42 @@ export default function AppDetail() {
     void queryClient.invalidateQueries({ queryKey: ["stats"] });
   }
 
+  const rotateInstTokenM = useMutation({
+    mutationFn: (inst: InstanceView) =>
+      post<RotatedToken>(`/apps/${appId}/instances/${inst.id}/rotate-token`),
+    onSuccess: (r) => {
+      setRotatedInstToken(r.token);
+      refresh("instances");
+    },
+    onError: (e) => {
+      toast("error", errMessage(e));
+      setRotateInst(null);
+    },
+  });
+
+  const deleteInstM = useMutation({
+    mutationFn: (inst: InstanceView) =>
+      del(`/apps/${appId}/instances/${inst.id}`),
+    onSuccess: () => {
+      toast("success", "instance deleted");
+      setDeleteInst(null);
+      refresh("instances");
+    },
+    onError: (e) => {
+      toast("error", errMessage(e));
+      setDeleteInst(null);
+    },
+  });
+
+  const rotateAppTokenM = useMutation({
+    mutationFn: () => post<RotatedToken>(`/apps/${appId}/rotate-token`),
+    onSuccess: (r) => setRotatedAppToken(r.token),
+    onError: (e) => {
+      toast("error", errMessage(e));
+      setRotateAppTokenOpen(false);
+    },
+  });
+
   if (appQ.isPending) return <Spinner />;
   if (appQ.isError) {
     return <EmptyState title="app not found" sub={errMessage(appQ.error)} />;
@@ -244,21 +280,10 @@ export default function AppDetail() {
           </Btn>
           <Btn
             variant="pink"
-            onClick={async () => {
-              if (!rotateInst) return;
-              try {
-                const r = await post<RotatedToken>(
-                  `/apps/${app.id}/instances/${rotateInst.id}/rotate-token`,
-                );
-                setRotatedInstToken(r.token);
-                refresh("instances");
-              } catch (e) {
-                toast("error", errMessage(e));
-                setRotateInst(null);
-              }
-            }}
+            onClick={() => rotateInst && rotateInstTokenM.mutate(rotateInst)}
+            disabled={rotateInstTokenM.isPending}
           >
-            rotate it
+            {rotateInstTokenM.isPending ? "rotating…" : "rotate it"}
           </Btn>
         </div>
       </Modal>
@@ -307,20 +332,10 @@ export default function AppDetail() {
           </Btn>
           <Btn
             variant="pink"
-            onClick={async () => {
-              if (!deleteInst) return;
-              try {
-                await del(`/apps/${app.id}/instances/${deleteInst.id}`);
-                toast("success", "instance deleted");
-                setDeleteInst(null);
-                refresh("instances");
-              } catch (e) {
-                toast("error", errMessage(e));
-                setDeleteInst(null);
-              }
-            }}
+            onClick={() => deleteInst && deleteInstM.mutate(deleteInst)}
+            disabled={deleteInstM.isPending}
           >
-            delete forever
+            {deleteInstM.isPending ? "deleting…" : "delete forever"}
           </Btn>
         </div>
       </Modal>
@@ -366,19 +381,10 @@ export default function AppDetail() {
           </Btn>
           <Btn
             variant="pink"
-            onClick={async () => {
-              try {
-                const r = await post<RotatedToken>(
-                  `/apps/${app.id}/rotate-token`,
-                );
-                setRotatedAppToken(r.token);
-              } catch (e) {
-                toast("error", errMessage(e));
-                setRotateAppTokenOpen(false);
-              }
-            }}
+            onClick={() => rotateAppTokenM.mutate()}
+            disabled={rotateAppTokenM.isPending}
           >
-            rotate it
+            {rotateAppTokenM.isPending ? "rotating…" : "rotate it"}
           </Btn>
         </div>
       </Modal>
