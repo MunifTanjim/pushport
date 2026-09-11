@@ -32,8 +32,9 @@ limits are all unlimited until you set [usage plans](/guide/usage-plans).
 | `PUSHPORT_PUSH_ENDPOINT_TTL` | `360h` (15 days) | Default lifetime of a sealed push endpoint. |
 | `PUSHPORT_MAX_PAYLOAD_BYTES` | `3000`           | Maximum request body size for a push send.  |
 
-Endpoint TTLs requested by clients are clamped to a fixed window of
-**12 hours to 45 days**, regardless of configuration.
+Endpoint TTLs must fall within a fixed window of **12 hours to 45 days**: a
+client requesting a TTL outside it is rejected, and `PUSHPORT_PUSH_ENDPOINT_TTL`
+must also be within the window or the server refuses to start.
 
 ### Self-Registration and Subscribe Limits
 

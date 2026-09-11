@@ -87,6 +87,9 @@ func Load() (Config, error) {
 	if c.QuotaFlushInterval <= 0 {
 		return c, errors.New("PUSHPORT_QUOTA_FLUSH_INTERVAL must be a positive duration (e.g. 30s)")
 	}
+	if t := c.PushEndpoint.TTL; t < c.PushEndpoint.TTLMin || t > c.PushEndpoint.TTLMax {
+		return c, fmt.Errorf("PUSHPORT_PUSH_ENDPOINT_TTL must be between %s and %s", c.PushEndpoint.TTLMin, c.PushEndpoint.TTLMax)
+	}
 	return c, nil
 }
 

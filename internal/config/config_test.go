@@ -118,6 +118,8 @@ func TestLoadRejectsInvalidHardening(t *testing.T) {
 		{"negative max payload", "PUSHPORT_MAX_PAYLOAD_BYTES", "-1"},
 		{"zero flush interval", "PUSHPORT_QUOTA_FLUSH_INTERVAL", "0s"},
 		{"negative flush interval", "PUSHPORT_QUOTA_FLUSH_INTERVAL", "-5s"},
+		{"ttl below min", "PUSHPORT_PUSH_ENDPOINT_TTL", "1h"},
+		{"ttl above max", "PUSHPORT_PUSH_ENDPOINT_TTL", "2160h"}, // 90d
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
