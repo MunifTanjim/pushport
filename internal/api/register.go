@@ -58,9 +58,26 @@ func (h *InstanceRegistrationHandler) resolveTurnstile(ctx context.Context, appI
 	return "", "", false, nil
 }
 
+// Per-IP register-page ceiling, checked before any DB lookup so app-id scans
+// can't drive unbounded queries.
+const (
+	registerPageIPPerMin = 60
+	registerPageIPBurst  = 10
+)
+
 func (h *InstanceRegistrationHandler) registerPage(w http.ResponseWriter, r *http.Request) {
 	appID := r.PathValue("app_id")
 	ctx := r.Context()
+	if h.ipLimiter != nil {
+		if ok, retry := h.ipLimiter.Allow("registerpage:"+clientIP(r), registerPageIPPerMin, registerPageIPBurst); !ok {
+			e := ErrorTooManyRequests()
+			if retry > 0 {
+				e.WithRetryAfter(retryAfterSeconds(retry))
+			}
+			SendError(w, r, e)
+			return
+		}
+	}
 	pub, err := h.apps.IsPublic(ctx, appID)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
