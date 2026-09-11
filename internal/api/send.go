@@ -50,7 +50,13 @@ func (h *SendHandler) send(w http.ResponseWriter, r *http.Request) {
 	}
 	inst, err := h.instances.Authenticate(r.Context(), raw)
 	if err != nil {
-		SendError(w, r, ErrorUnauthorized())
+		if errors.Is(err, instance.ErrInvalid) {
+			SendError(w, r, ErrorUnauthorized())
+		} else {
+			// A storage/infra error isn't an auth failure: 500 so it shows as a
+			// 5xx and doesn't feed the per-IP auth-failure throttle.
+			SendError(w, r, ErrorInternalServerError().WithCause(err))
+		}
 		return
 	}
 

@@ -89,6 +89,39 @@ func TestSendUnauthorizedWithoutKey(t *testing.T) {
 	}
 }
 
+func TestSendAuthDBErrorReturns500(t *testing.T) {
+	// A storage failure during instance auth must be a 500, not a 401 — a 401
+	// would masquerade as bad credentials and feed the per-IP auth throttle.
+	d, err := db.Open(":memory:")
+	if err != nil {
+		t.Fatalf("store: %v", err)
+	}
+	mk := make([]byte, 32)
+	_, _ = rand.Read(mk)
+	kr, _ := crypto.NewKeyring([][]byte{mk})
+	tsvc := app.NewService(d, kr)
+	tn, _ := tsvc.Create(context.Background(), "app")
+	instances := instance.NewService(d.Queries, kr)
+	rawKey, _, _ := instances.Issue(context.Background(), tn.ID, "srv")
+	sealSvc := seal.NewService(tsvc)
+	endpoint, _ := sealSvc.Seal(context.Background(), tn.ID, seal.Payload{
+		Transport: "apns", TransportRef: "devtoken", Exp: time.Now().Add(time.Hour).Unix(), JTI: "j1",
+	})
+	h := NewSendHandler(instances, sealSvc, &fakeSender{}, 4096)
+	mux := http.NewServeMux()
+	h.Routes(mux)
+	srv := httptest.NewServer(WithRequestID(mux))
+	t.Cleanup(srv.Close)
+
+	// Break the DB so GetInstance fails with a non-ErrNoRows error.
+	_ = d.Close()
+
+	resp := post(t, srv, endpoint, rawKey, "x")
+	if resp.StatusCode != http.StatusInternalServerError {
+		t.Fatalf("want 500 on DB error during auth, got %d", resp.StatusCode)
+	}
+}
+
 func TestSendMalformedTokenReturns404(t *testing.T) {
 	srv, key, _ := newSendFixture(t, &fakeSender{})
 	resp := post(t, srv, "not-a-token", key, "x")
