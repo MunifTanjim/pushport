@@ -185,11 +185,13 @@ func runServe() error {
 		}
 	}()
 
+	var exitErr error
 	select {
 	case sig := <-quit:
 		log.Printf("received signal: %v, shutting down...", sig)
 	case err := <-serveErr:
 		log.Printf("serve error: %v", err)
+		exitErr = err
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -202,5 +204,5 @@ func runServe() error {
 	// database.Close runs.
 	close(janitorDone)
 	<-janitorStopped
-	return nil
+	return exitErr
 }
