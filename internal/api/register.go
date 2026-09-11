@@ -7,6 +7,7 @@ import (
 	"errors"
 	"html/template"
 	"net/http"
+	"strings"
 
 	"github.com/MunifTanjim/pushport/internal/app"
 	"github.com/MunifTanjim/pushport/internal/db"
@@ -124,7 +125,12 @@ func (h *InstanceRegistrationHandler) createInstance(w http.ResponseWriter, r *h
 			SendError(w, r, ErrorInternalServerError().WithCause(err))
 			return
 		}
-		h.mint(w, r, appID, decodeLabel(w, r))
+		label := decodeLabel(w, r)
+		if strings.TrimSpace(label) == "" {
+			SendError(w, r, ErrorBadRequest().WithMessage("label is required"))
+			return
+		}
+		h.mint(w, r, appID, label)
 		return
 	}
 
@@ -182,7 +188,7 @@ func (h *InstanceRegistrationHandler) createInstance(w http.ResponseWriter, r *h
 		}
 	}
 
-	if body.Label == "" {
+	if strings.TrimSpace(body.Label) == "" {
 		SendError(w, r, ErrorBadRequest().WithMessage("label is required"))
 		return
 	}

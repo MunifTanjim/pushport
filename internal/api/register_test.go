@@ -209,6 +209,13 @@ func TestCreateInstanceOwnerMode(t *testing.T) {
 	if s := regPost(t, srv, "/apps/bogus/instances", "Bearer admintok", `{}`); s != http.StatusNotFound {
 		t.Fatalf("unknown app: want 404 got %d", s)
 	}
+	// Empty/whitespace label is rejected on the authed path too (matches public).
+	if s := regPost(t, srv, "/apps/"+id+"/instances", "Bearer admintok", `{}`); s != http.StatusBadRequest {
+		t.Fatalf("missing label: want 400 got %d", s)
+	}
+	if s := regPost(t, srv, "/apps/"+id+"/instances", "Bearer admintok", `{"label":"   "}`); s != http.StatusBadRequest {
+		t.Fatalf("whitespace label: want 400 got %d", s)
+	}
 }
 
 func TestCreateInstancePublicMode(t *testing.T) {

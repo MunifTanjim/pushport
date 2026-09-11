@@ -39,7 +39,7 @@ func TestStats(t *testing.T) {
 	app1, _, _ := createAppAdmin(t, srv, `{"name":"alpha"}`)
 	app2, _, _ := createAppAdmin(t, srv, `{"name":"beta"}`)
 
-	resp, err := c.Do(jsonReq(t, "POST", srv.URL+"/apps/"+app1+"/instances", "Bearer admintok", `{}`))
+	resp, err := c.Do(jsonReq(t, "POST", srv.URL+"/apps/"+app1+"/instances", "Bearer admintok", `{"label":"i1"}`))
 	if err != nil || resp.StatusCode != http.StatusCreated {
 		t.Fatalf("create instance: err=%v status=%d", err, resp.StatusCode)
 	}
@@ -106,7 +106,7 @@ func TestAppStats(t *testing.T) {
 	app1, _, tok1 := createAppAdmin(t, srv, `{"name":"alpha"}`)
 	app2, _, _ := createAppAdmin(t, srv, `{"name":"beta"}`)
 
-	resp, err := c.Do(jsonReq(t, "POST", srv.URL+"/apps/"+app1+"/instances", "Bearer admintok", `{}`))
+	resp, err := c.Do(jsonReq(t, "POST", srv.URL+"/apps/"+app1+"/instances", "Bearer admintok", `{"label":"i1"}`))
 	if err != nil || resp.StatusCode != http.StatusCreated {
 		t.Fatalf("create instance: err=%v status=%d", err, resp.StatusCode)
 	}
