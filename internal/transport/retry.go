@@ -66,6 +66,11 @@ func (r *RetryingSender) Send(ctx context.Context, tenantID, transportName, tran
 		if !transient(res, err) || attempt == maxAttempts {
 			return res, err
 		}
+		// Over-budget Retry-After: return so the caller gets a 429/503 with the
+		// real wait, rather than parking the goroutine on a wait we can't honor.
+		if res.RetryAfter > max {
+			return res, err
+		}
 		wait := backoff(attempt, base, max, r.jitter)
 		if res.RetryAfter > wait {
 			wait = res.RetryAfter
