@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { clearSession, getSession } from "../auth/token";
@@ -55,6 +56,7 @@ function ThemeToggle() {
 
 export function Layout() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const session = getSession();
   const isAdmin = session?.principal === "admin";
 
@@ -107,6 +109,7 @@ export function Layout() {
             title="Forget the stored token"
             onClick={() => {
               clearSession();
+              queryClient.clear();
               navigate("/login", { replace: true });
             }}
           >
