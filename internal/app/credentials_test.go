@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"testing"
 
 	"github.com/MunifTanjim/pushport/internal/crypto"
@@ -71,5 +72,45 @@ func TestCredentialsRoundTrip(t *testing.T) {
 	}
 	if got.WebPush == nil {
 		t.Fatalf("webpush should remain after deleting apns")
+	}
+}
+
+func TestFCMProjectIDExtract(t *testing.T) {
+	id, err := FCMProjectID(`{"type":"service_account","project_id":"p1"}`)
+	if err != nil {
+		t.Fatalf("extract: %v", err)
+	}
+	if id != "p1" {
+		t.Fatalf("got %q, want p1", id)
+	}
+	if _, err := FCMProjectID(`{"type":"service_account"}`); err == nil {
+		t.Fatal("expected error for missing project_id")
+	}
+	if _, err := FCMProjectID("not json"); err == nil {
+		t.Fatal("expected error for invalid JSON")
+	}
+}
+
+func TestSetFCMCredentialsValidatesJSON(t *testing.T) {
+	ctx := context.Background()
+	svc, tid := newCredSvc(t)
+
+	if err := svc.SetFCMCredentials(ctx, tid, FCMCreds{ServiceAccountJSON: "not json"}); !errors.Is(err, ErrInvalidCreds) {
+		t.Fatalf("invalid json: want ErrInvalidCreds, got %v", err)
+	}
+	if err := svc.SetFCMCredentials(ctx, tid, FCMCreds{ServiceAccountJSON: `{"type":"service_account"}`}); !errors.Is(err, ErrInvalidCreds) {
+		t.Fatalf("missing project_id: want ErrInvalidCreds, got %v", err)
+	}
+
+	sa := `{"type":"service_account","project_id":"proj"}`
+	if err := svc.SetFCMCredentials(ctx, tid, FCMCreds{ServiceAccountJSON: sa}); err != nil {
+		t.Fatalf("set fcm: %v", err)
+	}
+	got, err := svc.GetCredentials(ctx, tid)
+	if err != nil {
+		t.Fatalf("get: %v", err)
+	}
+	if got.FCM == nil || got.FCM.ServiceAccountJSON != sa {
+		t.Fatalf("fcm not round-tripped: %+v", got.FCM)
 	}
 }

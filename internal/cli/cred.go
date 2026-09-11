@@ -87,7 +87,7 @@ func credsSetApnsCmd() *cobra.Command {
 }
 
 func credsSetFCMCmd() *cobra.Command {
-	var serviceAccount, projectID string
+	var serviceAccount string
 	cmd := &cobra.Command{
 		Use: "fcm", Short: "Set FCM credentials", Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -98,7 +98,7 @@ func credsSetFCMCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			body := map[string]any{"service_account_json": sa, "project_id": projectID}
+			body := map[string]any{"service_account_json": sa}
 			data, err := newClient().Do(ctx(), "PUT", appPath("/creds/fcm"), body)
 			if err != nil {
 				return err
@@ -108,9 +108,7 @@ func credsSetFCMCmd() *cobra.Command {
 	}
 	f := cmd.Flags()
 	f.StringVar(&serviceAccount, "service-account", "", "FCM service-account JSON (or @file)")
-	f.StringVar(&projectID, "project-id", "", "FCM project id")
 	_ = cmd.MarkFlagRequired("service-account")
-	_ = cmd.MarkFlagRequired("project-id")
 	return cmd
 }
 

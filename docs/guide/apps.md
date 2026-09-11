@@ -42,7 +42,7 @@ They're encrypted at rest and used only to authenticate with each transport.
 | Transport | What you upload                                                            | Where to get it                                           |
 | --------- | -------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `apns`    | `.p8` key, key id, Apple team id, topic (bundle id), sandbox vs production | Apple Developer → Keys                                    |
-| `fcm`     | Service-account JSON, project id                                           | Google Cloud → Service Accounts                           |
+| `fcm`     | Service-account JSON (project id is read from it)                          | Google Cloud → Service Accounts                           |
 | `webpush` | VAPID private key, subject (`mailto:` or URL)                              | Generate locally, e.g. `npx web-push generate-vapid-keys` |
 
 ```sh
@@ -56,10 +56,9 @@ pushport creds set apns \
   --topic com.example.myapp \
   --production
 
-# FCM
+# FCM (project id is derived from the service-account JSON)
 pushport creds set fcm \
-  --service-account @firebase-service-account.json \
-  --project-id my-app-123
+  --service-account @firebase-service-account.json
 
 # WebPush (public key is derived from the private key)
 pushport creds set webpush \

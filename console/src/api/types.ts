@@ -101,7 +101,6 @@ export interface ApnsCreds {
 
 export interface FcmCreds {
   service_account_json: string;
-  project_id: string;
 }
 
 export interface WebPushCreds {

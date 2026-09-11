@@ -743,7 +743,6 @@ function FcmCard({
   const toast = useToast();
   const [form, setForm] = useState<FcmCreds>({
     service_account_json: "",
-    project_id: "",
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -758,14 +757,19 @@ function FcmCard({
 
   function submit(e: FormEvent) {
     e.preventDefault();
-    if (!form.service_account_json.trim() || !form.project_id.trim()) {
+    if (!form.service_account_json.trim()) {
       setError("all fields are required");
       return;
     }
+    let sa: { project_id?: string };
     try {
-      JSON.parse(form.service_account_json);
+      sa = JSON.parse(form.service_account_json);
     } catch {
       setError("service account JSON doesn't parse");
+      return;
+    }
+    if (!sa.project_id) {
+      setError("service account JSON has no project_id");
       return;
     }
     setError(null);
@@ -788,12 +792,6 @@ function FcmCard({
               setForm({ ...form, service_account_json: e.target.value })
             }
             placeholder='{ "type": "service_account", … }'
-          />
-        </Field>
-        <Field label="project id">
-          <Input
-            value={form.project_id}
-            onChange={(e) => setForm({ ...form, project_id: e.target.value })}
           />
         </Field>
         {error && <ErrorNote text={error} />}

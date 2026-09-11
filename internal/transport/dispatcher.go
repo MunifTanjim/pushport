@@ -72,11 +72,15 @@ func (d *Dispatcher) bundleFor(ctx context.Context, appID string) (*bundle, erro
 		}
 	}
 	if c.FCM != nil {
-		if ts, err := FCMTokenSourceFromJSON(c.FCM.ServiceAccountJSON, d.client); err == nil {
-			b.fcm = NewFCM(c.FCM.ProjectID, ts, "", d.client)
-		} else {
+		projectID, err := app.FCMProjectID(c.FCM.ServiceAccountJSON)
+		if err != nil {
 			b.fcmErr = err
 			d.logBuildErr(appID, "fcm", err)
+		} else if ts, err := FCMTokenSourceFromJSON(c.FCM.ServiceAccountJSON, d.client); err != nil {
+			b.fcmErr = err
+			d.logBuildErr(appID, "fcm", err)
+		} else {
+			b.fcm = NewFCM(projectID, ts, "", d.client)
 		}
 	}
 	if c.WebPush != nil {

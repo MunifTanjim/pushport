@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sort"
 
+	"github.com/MunifTanjim/pushport/internal/app"
 	"github.com/MunifTanjim/pushport/internal/db"
 )
 
@@ -57,11 +58,14 @@ func setCredsHandler[T any](h *ManagementHandler, set func(context.Context, stri
 			return
 		}
 		if err := set(r.Context(), appID, creds); err != nil {
-			if errors.Is(err, db.ErrNotFound) {
+			switch {
+			case errors.Is(err, db.ErrNotFound):
 				SendError(w, r, ErrorNotFound().WithMessage("app not found"))
-				return
+			case errors.Is(err, app.ErrInvalidCreds):
+				SendError(w, r, ErrorBadRequest().WithCause(err))
+			default:
+				SendError(w, r, ErrorInternalServerError().WithCause(err))
 			}
-			SendError(w, r, ErrorInternalServerError().WithCause(err))
 			return
 		}
 		if h.onCredsChange != nil {

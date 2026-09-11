@@ -5,9 +5,14 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/MunifTanjim/pushport/internal/db"
 )
+
+// ErrInvalidCreds marks caller-supplied credential payloads that are
+// structurally unusable (bad JSON, missing required fields).
+var ErrInvalidCreds = errors.New("app: invalid credentials")
 
 type Credentials struct {
 	APNs    *APNsCreds    `json:"apns,omitempty"`
@@ -25,7 +30,22 @@ type APNsCreds struct {
 
 type FCMCreds struct {
 	ServiceAccountJSON string `json:"service_account_json"`
-	ProjectID          string `json:"project_id"`
+}
+
+// FCMProjectID extracts the project_id from a service-account JSON. FCM v1
+// send URLs are project-scoped, and the service account is issued per-project,
+// so the id always lives inside the JSON itself.
+func FCMProjectID(serviceAccountJSON string) (string, error) {
+	var sa struct {
+		ProjectID string `json:"project_id"`
+	}
+	if err := json.Unmarshal([]byte(serviceAccountJSON), &sa); err != nil {
+		return "", fmt.Errorf("%w: invalid service-account JSON: %v", ErrInvalidCreds, err)
+	}
+	if sa.ProjectID == "" {
+		return "", fmt.Errorf("%w: service-account JSON has no project_id", ErrInvalidCreds)
+	}
+	return sa.ProjectID, nil
 }
 
 type WebPushCreds struct {
@@ -78,6 +98,9 @@ func (svc *Service) SetAPNsCredentials(ctx context.Context, appID string, c APNs
 }
 
 func (svc *Service) SetFCMCredentials(ctx context.Context, appID string, c FCMCreds) error {
+	if _, err := FCMProjectID(c.ServiceAccountJSON); err != nil {
+		return err
+	}
 	return svc.setCred(ctx, appID, "fcm", c)
 }
 

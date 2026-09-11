@@ -160,15 +160,25 @@ func TestAdminSetCredentials(t *testing.T) {
 	if s := do("PUT", "/apps/"+id+"/creds/apns", apns); s != http.StatusNoContent {
 		t.Fatalf("set apns: status=%d", s)
 	}
-	fcm := `{"service_account_json":"{}","project_id":"proj"}`
-	if s := do("PUT", "/apps/"+id+"/creds/fcm", fcm); s != http.StatusNoContent {
+	sa := `{"type":"service_account","project_id":"proj"}`
+	fcmBody, err := json.Marshal(map[string]string{"service_account_json": sa})
+	if err != nil {
+		t.Fatalf("marshal fcm body: %v", err)
+	}
+	if s := do("PUT", "/apps/"+id+"/creds/fcm", string(fcmBody)); s != http.StatusNoContent {
 		t.Fatalf("set fcm: status=%d", s)
+	}
+	if s := do("PUT", "/apps/"+id+"/creds/fcm", `{"type":"service_account"}`); s != http.StatusBadRequest {
+		t.Fatalf("set fcm without project_id: want 400, got %d", s)
+	}
+	if s := do("PUT", "/apps/"+id+"/creds/fcm", `not json`); s != http.StatusBadRequest {
+		t.Fatalf("set fcm with bad json: want 400, got %d", s)
 	}
 	got, err := svc.GetCredentials(t.Context(), id)
 	if err != nil {
 		t.Fatalf("get creds: %v", err)
 	}
-	if got.APNs == nil || got.APNs.KeyID != "K1" || got.FCM == nil || got.FCM.ProjectID != "proj" {
+	if got.APNs == nil || got.APNs.KeyID != "K1" || got.FCM == nil || got.FCM.ServiceAccountJSON != sa {
 		t.Fatalf("both transports should be set: %+v", got)
 	}
 
@@ -179,7 +189,7 @@ func TestAdminSetCredentials(t *testing.T) {
 	if got.APNs != nil {
 		t.Fatalf("apns should be gone: %+v", got.APNs)
 	}
-	if got.FCM == nil || got.FCM.ProjectID != "proj" {
+	if got.FCM == nil || got.FCM.ServiceAccountJSON != sa {
 		t.Fatalf("fcm should remain: %+v", got.FCM)
 	}
 
