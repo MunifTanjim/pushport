@@ -43,10 +43,10 @@ func (h *ManagementHandler) getStats(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case strings.HasPrefix(row.Scope, ratelimit.ScopeApp):
 			byApp[strings.TrimPrefix(row.Scope, ratelimit.ScopeApp)] = row.Count
+			total += row.Count
 		case strings.HasPrefix(row.Scope, ratelimit.ScopeInstance):
 			byInstance[strings.TrimPrefix(row.Scope, ratelimit.ScopeInstance)] = row.Count
 		}
-		total += row.Count
 	}
 
 	apps, err := h.queries.CountApps(ctx)

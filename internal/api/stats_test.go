@@ -83,8 +83,10 @@ func TestStats(t *testing.T) {
 	if s.TotalApps != 2 || s.TotalInstances != 1 {
 		t.Fatalf("want totals apps=2 instances=1, got %d/%d", s.TotalApps, s.TotalInstances)
 	}
-	if s.TotalPushes != 180 {
-		t.Fatalf("want total_pushes=180, got %d", s.TotalPushes)
+	// Total is the sum of app-scope counters only (100+23); instance-scope
+	// counters mirror the same pushes and the unknown scope is ignored.
+	if s.TotalPushes != 123 {
+		t.Fatalf("want total_pushes=123, got %d", s.TotalPushes)
 	}
 	if s.PushesByApp[app1] != 100 || s.PushesByApp[app2] != 23 || len(s.PushesByApp) != 2 {
 		t.Fatalf("bad pushes_by_app: %v", s.PushesByApp)
