@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.3](https://github.com/MunifTanjim/pushport/compare/0.0.2...0.0.3) (2026-09-12)
+
+
+### Features
+
+* **apns:** default to production with sandbox subscribe toggle ([62458c9](https://github.com/MunifTanjim/pushport/commit/62458c9d42c3386602de9e352a43f60fcd76abd4))
+* **server:** guard webpush endpoints against ssrf ([c03b0d5](https://github.com/MunifTanjim/pushport/commit/c03b0d5075665cadafa34ab6a817c8db8e8f4185))
+
 ## [0.0.2](https://github.com/MunifTanjim/pushport/compare/0.0.1...0.0.2) (2026-09-11)
 
 
