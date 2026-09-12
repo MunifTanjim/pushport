@@ -20,10 +20,24 @@ limits are all unlimited until you set [usage plans](/guide/usage-plans).
 
 ### Networking & Proxy
 
-| Variable                    | Default | Description                                                                                                                                                               |
-| --------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PUSHPORT_CORS_ORIGIN`      | empty   | Comma-separated allowlist of browser origins permitted to call the API cross-origin.                                                                                      |
-| `PUSHPORT_CLIENT_IP_HEADER` | empty   | Header to read the client IP from for per-IP limits, e.g. `CF-Connecting-IP`. Trusted from any peer, so set it only when all traffic passes through a proxy that sets it. |
+| Variable                         | Default | Description                                                                                                                                                               |
+| -------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUSHPORT_CORS_ORIGIN`           | empty   | Comma-separated allowlist of browser origins permitted to call the API cross-origin.                                                                                      |
+| `PUSHPORT_CLIENT_IP_HEADER`      | empty   | Header to read the client IP from for per-IP limits, e.g. `CF-Connecting-IP`. Trusted from any peer, so set it only when all traffic passes through a proxy that sets it. |
+| `PUSHPORT_WEBPUSH_ALLOWED_HOSTS` | empty   | Comma-separated allowlist of WebPush endpoint targets (hostnames and/or IPs/CIDRs).                                                                                       |
+
+The relay POSTs to the endpoint URL a WebPush subscription supplies, so by
+default it only accepts **https** to **public** hosts (SSRF guard); private,
+loopback, link-local, and metadata addresses are rejected, including hostnames
+that resolve to them.
+
+Set `PUSHPORT_WEBPUSH_ALLOWED_HOSTS` to allow your own internal/insecure endpoint
+or local testing. Each entry is a hostname, IP, or CIDR, and bypasses both the
+https and private-address checks — for example:
+
+```
+PUSHPORT_WEBPUSH_ALLOWED_HOSTS=localhost,127.0.0.1,::1
+```
 
 ### Push Endpoints
 

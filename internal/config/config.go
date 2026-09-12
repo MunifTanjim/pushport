@@ -46,6 +46,9 @@ type Config struct {
 	// (the default), X-Forwarded-For is honored only from a private/loopback peer
 	// (an in-network proxy); otherwise the transport peer IP is used.
 	ClientIPHeader string
+	// WebPushAllowedHosts allowlists WebPush targets (hostnames/IPs/CIDRs);
+	// empty is the strict default.
+	WebPushAllowedHosts []string
 }
 
 func Load() (Config, error) {
@@ -61,11 +64,8 @@ func Load() (Config, error) {
 	c.MaxPayloadBytes = getenvInt64("PUSHPORT_MAX_PAYLOAD_BYTES", 3000)
 	c.QuotaFlushInterval = getenvDuration("PUSHPORT_QUOTA_FLUSH_INTERVAL", "30s")
 	c.ClientIPHeader = strings.TrimSpace(os.Getenv("PUSHPORT_CLIENT_IP_HEADER"))
-	for part := range strings.SplitSeq(os.Getenv("PUSHPORT_CORS_ORIGIN"), ",") {
-		if part = strings.TrimSpace(part); part != "" {
-			c.CORSOrigins = append(c.CORSOrigins, part)
-		}
-	}
+	c.CORSOrigins = getenvCSV("PUSHPORT_CORS_ORIGIN")
+	c.WebPushAllowedHosts = getenvCSV("PUSHPORT_WEBPUSH_ALLOWED_HOSTS")
 	rawSecret := os.Getenv("PUSHPORT_SECRET")
 	if rawSecret == "" {
 		return c, errors.New("PUSHPORT_SECRET is required")
@@ -106,6 +106,17 @@ func validateAdminToken(token string) error {
 		return fmt.Errorf("PUSHPORT_ADMIN_TOKEN must be at least %d characters (generate one with `openssl rand -base64 32`)", adminTokenMinLen)
 	}
 	return nil
+}
+
+// getenvCSV splits a comma-separated env var into trimmed, non-empty entries.
+func getenvCSV(k string) []string {
+	var out []string
+	for part := range strings.SplitSeq(os.Getenv(k), ",") {
+		if part = strings.TrimSpace(part); part != "" {
+			out = append(out, part)
+		}
+	}
+	return out
 }
 
 func getenv(k, def string) string {

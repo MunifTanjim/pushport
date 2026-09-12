@@ -59,7 +59,17 @@ func runServe() error {
 	instances := instance.NewService(database.Queries, keyring)
 	sealSvc := seal.NewService(apps)
 
-	httpClient := &http.Client{Timeout: 30 * time.Second}
+	webpushPolicy, err := transport.NewEndpointPolicy(cfg.WebPushAllowedHosts)
+	if err != nil {
+		return fmt.Errorf("PUSHPORT_WEBPUSH_ALLOWED_HOSTS: %w", err)
+	}
+
+	// Safe to share one guarded client: only the registrant-controlled WebPush
+	// URL is an SSRF risk; APNs/FCM/turnstile are public.
+	httpClient, err := webpushPolicy.GuardClient(&http.Client{Timeout: 30 * time.Second})
+	if err != nil {
+		return fmt.Errorf("webpush ssrf guard: %w", err)
+	}
 
 	verifier := turnstile.New(httpClient)
 
@@ -142,6 +152,7 @@ func runServe() error {
 
 	device := api.NewDeviceHandler(sealSvc, apps, cfg.BaseURL, cfg.PushEndpoint.TTL, cfg.PushEndpoint.TTLMin, cfg.PushEndpoint.TTLMax)
 	device.SetRateLimit(subscribeLimiter, resolver)
+	device.SetWebPushPolicy(webpushPolicy)
 	device.Routes(mux)
 
 	registration := api.NewInstanceRegistrationHandler(instances, apps, registerLimiter, resolver, cfg.AdminToken, verifier)

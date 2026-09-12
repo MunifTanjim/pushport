@@ -93,7 +93,7 @@ func TestSubscribeSandboxToggle(t *testing.T) {
 	if p := post(`{"transport":"fcm","token":"t2","sandbox":true}`); p.Sandbox {
 		t.Fatal("sandbox must be ignored for non-apns transports")
 	}
-	if p := post(`{"transport":"webpush","token":"t3","sandbox":true}`); p.Sandbox {
+	if p := post(`{"transport":"webpush","token":"https://push.example.com/ep","sandbox":true}`); p.Sandbox {
 		t.Fatal("sandbox must be ignored for non-apns transports")
 	}
 }
@@ -249,6 +249,38 @@ func TestSubscribePerAppKeying(t *testing.T) {
 	}
 	if c := postTo(appB.ID); c != http.StatusCreated {
 		t.Fatalf("app-b 1st: want 201, got %d (per-app keying broken: A's bucket bled into B)", c)
+	}
+}
+
+func TestSubscribeRejectsWebPushSSRF(t *testing.T) {
+	srv, appSvc, _ := newDeviceServer(t) // default-strict webpush policy
+	a, _ := appSvc.Create(nil_ctx(), "app")
+
+	post := func(endpoint string) int {
+		body := `{"transport":"webpush","token":"` + endpoint + `"}`
+		resp, err := http.Post(srv.URL+"/apps/"+a.ID+"/subscribe", "application/json", strings.NewReader(body))
+		if err != nil {
+			t.Fatalf("post %s: %v", endpoint, err)
+		}
+		resp.Body.Close()
+		return resp.StatusCode
+	}
+
+	for _, endpoint := range []string{
+		"http://169.254.169.254/ep", // cloud metadata over http
+		"https://169.254.169.254/ep",
+		"https://10.0.0.1/ep",        // private
+		"https://127.0.0.1/ep",       // loopback
+		"http://push.example.com/ep", // non-https public
+		"not-a-url",
+	} {
+		if c := post(endpoint); c != http.StatusBadRequest {
+			t.Errorf("webpush %q: want 400, got %d", endpoint, c)
+		}
+	}
+
+	if c := post("https://push.example.com/ep"); c != http.StatusCreated {
+		t.Errorf("public https webpush: want 201, got %d", c)
 	}
 }
 

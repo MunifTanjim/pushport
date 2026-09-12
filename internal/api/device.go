@@ -11,6 +11,7 @@ import (
 	"github.com/MunifTanjim/pushport/internal/id"
 	"github.com/MunifTanjim/pushport/internal/ratelimit"
 	"github.com/MunifTanjim/pushport/internal/seal"
+	"github.com/MunifTanjim/pushport/internal/transport"
 )
 
 var validTransports = map[string]bool{"apns": true, "fcm": true, "webpush": true}
@@ -25,6 +26,8 @@ type DeviceHandler struct {
 
 	limiter  *ratelimit.Limiter
 	resolver *ratelimit.Resolver
+
+	webpushPolicy transport.EndpointPolicy
 }
 
 func NewDeviceHandler(s *seal.Service, a *app.Service, baseURL string, defaultTTL, minTTL, maxTTL time.Duration) *DeviceHandler {
@@ -35,6 +38,11 @@ func NewDeviceHandler(s *seal.Service, a *app.Service, baseURL string, defaultTT
 // AppSubscribePerMin <= 0 leaves the endpoint unlimited.
 func (h *DeviceHandler) SetRateLimit(l *ratelimit.Limiter, resolver *ratelimit.Resolver) {
 	h.limiter, h.resolver = l, resolver
+}
+
+// SetWebPushPolicy is optional; unset, the handler stays strict.
+func (h *DeviceHandler) SetWebPushPolicy(p transport.EndpointPolicy) {
+	h.webpushPolicy = p
 }
 
 func (h *DeviceHandler) Routes(mux *http.ServeMux) {
@@ -67,6 +75,13 @@ func (h *DeviceHandler) subscribe(w http.ResponseWriter, r *http.Request) {
 	if !validTransports[body.Transport] || body.Token == "" {
 		SendError(w, r, ErrorBadRequest().WithMessage("invalid transport or token"))
 		return
+	}
+	// The WebPush token is a URL the relay will POST to — an SSRF vector.
+	if body.Transport == "webpush" {
+		if err := h.webpushPolicy.Validate(body.Token); err != nil {
+			SendError(w, r, ErrorBadRequest().WithMessage(err.Error()))
+			return
+		}
 	}
 	// CurrentKey doubles as the app-existence check and confirms a usable sealing key.
 	if _, _, _, err := h.apps.CurrentKey(r.Context(), appID); err != nil {
