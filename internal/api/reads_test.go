@@ -235,7 +235,7 @@ func TestListCreds(t *testing.T) {
 		t.Fatalf("want empty transports, got %v", got.Transports)
 	}
 
-	apns := `{"key_p8":"PEM","key_id":"K1","team_id":"T1","topic":"com.x","production":true}`
+	apns := `{"key_p8":"PEM","key_id":"K1","team_id":"T1","topic":"com.x"}`
 	r2, _ := c.Do(jsonReq(t, "PUT", srv.URL+"/apps/"+appID+"/creds/apns", "Bearer admintok", apns))
 	if r2.StatusCode != http.StatusNoContent {
 		t.Fatalf("set apns: status=%d", r2.StatusCode)

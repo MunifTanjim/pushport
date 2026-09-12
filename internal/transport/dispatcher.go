@@ -14,7 +14,8 @@ type CredsProvider interface {
 }
 
 type bundle struct {
-	apns                        Transport
+	apns                        Transport // production APNs client
+	apnsSandbox                 Transport // sandbox APNs client
 	fcm                         Transport
 	webpush                     Transport
 	apnsErr, fcmErr, webpushErr error
@@ -27,6 +28,10 @@ type Dispatcher struct {
 
 	mu    sync.Mutex
 	cache map[string]*bundle
+}
+
+type SendOptions struct {
+	Sandbox bool
 }
 
 func (d *Dispatcher) SetLogger(l *slog.Logger) { d.logger = l }
@@ -64,11 +69,19 @@ func (d *Dispatcher) bundleFor(ctx context.Context, appID string) (*bundle, erro
 	}
 	b := &bundle{}
 	if c.APNs != nil {
-		if tr, err := NewAPNs(*c.APNs, "", d.client); err == nil {
-			b.apns = tr
-		} else {
+		tr, err := NewAPNs(*c.APNs, "", false, d.client)
+		if err != nil {
 			b.apnsErr = err
 			d.logBuildErr(appID, "apns", err)
+		} else {
+			b.apns = tr
+			s, err := NewAPNs(*c.APNs, "", true, d.client)
+			if err != nil {
+				b.apnsErr = err
+				d.logBuildErr(appID, "apns", err)
+			} else {
+				b.apnsSandbox = s
+			}
 		}
 	}
 	if c.FCM != nil {
@@ -97,7 +110,7 @@ func (d *Dispatcher) bundleFor(ctx context.Context, appID string) (*bundle, erro
 	return b, nil
 }
 
-func (d *Dispatcher) Send(ctx context.Context, appID, transportName, transportRef string, msg Message) (Result, error) {
+func (d *Dispatcher) Send(ctx context.Context, appID, transportName, transportRef string, opts SendOptions, msg Message) (Result, error) {
 	b, err := d.bundleFor(ctx, appID)
 	if err != nil {
 		return Result{}, err
@@ -107,6 +120,9 @@ func (d *Dispatcher) Send(ctx context.Context, appID, transportName, transportRe
 	switch transportName {
 	case "apns":
 		tr, buildErr = b.apns, b.apnsErr
+		if opts.Sandbox {
+			tr = b.apnsSandbox
+		}
 	case "fcm":
 		tr, buildErr = b.fcm, b.fcmErr
 	case "webpush":

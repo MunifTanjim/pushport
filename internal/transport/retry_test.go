@@ -26,7 +26,7 @@ func TestRetryingSenderUsesProviderAttempts(t *testing.T) {
 	}
 	rs := NewRetryingSender(inner, stubRetryCfg{attempts: 3, base: time.Millisecond, max: time.Millisecond})
 	rs.sleep = func(context.Context, time.Duration) error { return nil }
-	_, _ = rs.Send(context.Background(), "t", "apns", "ref", Message{})
+	_, _ = rs.Send(context.Background(), "t", "apns", "ref", SendOptions{}, Message{})
 	if inner.calls != 3 {
 		t.Fatalf("expected 3 attempts from provider, got %d", inner.calls)
 	}
@@ -38,7 +38,7 @@ type scriptedSender struct {
 	calls   int
 }
 
-func (s *scriptedSender) Send(_ context.Context, _, _, _ string, _ Message) (Result, error) {
+func (s *scriptedSender) Send(_ context.Context, _, _, _ string, _ SendOptions, _ Message) (Result, error) {
 	i := s.calls
 	s.calls++
 	var err error
@@ -63,7 +63,7 @@ func TestRetrySucceedsAfterTransient(t *testing.T) {
 		results: []Result{{StatusCode: 503}, {Delivered: true, StatusCode: 200}},
 	}
 	r := newNoSleepRetrier(inner, 3)
-	res, err := r.Send(context.Background(), "t", "apns", "ref", Message{})
+	res, err := r.Send(context.Background(), "t", "apns", "ref", SendOptions{}, Message{})
 	if err != nil || !res.Delivered {
 		t.Fatalf("expected delivered, got res=%+v err=%v", res, err)
 	}
@@ -75,7 +75,7 @@ func TestRetrySucceedsAfterTransient(t *testing.T) {
 func TestRetryStopsOnPermanent(t *testing.T) {
 	inner := &scriptedSender{results: []Result{{Permanent: true, StatusCode: 410}}}
 	r := newNoSleepRetrier(inner, 3)
-	res, _ := r.Send(context.Background(), "t", "apns", "ref", Message{})
+	res, _ := r.Send(context.Background(), "t", "apns", "ref", SendOptions{}, Message{})
 	if !res.Permanent || inner.calls != 1 {
 		t.Fatalf("permanent should not retry: res=%+v calls=%d", res, inner.calls)
 	}
@@ -114,7 +114,7 @@ func TestRetryHonorsRetryAfterOverJitter(t *testing.T) {
 	rs := NewRetryingSender(inner, stubRetryCfg{attempts: 3, base: 100 * time.Millisecond, max: time.Minute})
 	rs.sleep = func(_ context.Context, d time.Duration) error { waits = append(waits, d); return nil }
 	rs.jitter = func(int64) int64 { return 0 } // minimal backoff so Retry-After clearly dominates
-	if _, err := rs.Send(context.Background(), "t", "apns", "ref", Message{}); err != nil {
+	if _, err := rs.Send(context.Background(), "t", "apns", "ref", SendOptions{}, Message{}); err != nil {
 		t.Fatalf("send: %v", err)
 	}
 	if len(waits) != 1 {
@@ -128,7 +128,7 @@ func TestRetryHonorsRetryAfterOverJitter(t *testing.T) {
 func TestRetryExhaustsAttempts(t *testing.T) {
 	inner := &scriptedSender{errs: []error{errors.New("x"), errors.New("x"), errors.New("x")}}
 	r := newNoSleepRetrier(inner, 3)
-	_, err := r.Send(context.Background(), "t", "apns", "ref", Message{})
+	_, err := r.Send(context.Background(), "t", "apns", "ref", SendOptions{}, Message{})
 	if err == nil || inner.calls != 3 {
 		t.Fatalf("expected 3 attempts then error, got calls=%d err=%v", inner.calls, err)
 	}

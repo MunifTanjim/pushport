@@ -41,9 +41,13 @@ They're encrypted at rest and used only to authenticate with each transport.
 
 | Transport | What you upload                                                            | Where to get it                                           |
 | --------- | -------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `apns`    | `.p8` key, key id, Apple team id, topic (bundle id), sandbox vs production | Apple Developer → Keys                                    |
+| `apns`    | `.p8` key, key id, Apple team id, topic (bundle id)                        | Apple Developer → Keys                                    |
 | `fcm`     | Service-account JSON (project id is read from it)                          | Google Cloud → Service Accounts                           |
 | `webpush` | VAPID private key, subject (`mailto:` or URL)                              | Generate locally, e.g. `npx web-push generate-vapid-keys` |
+
+APNs delivery defaults to the production environment. Per-endpoint sandbox
+delivery is chosen at [subscribe time](/guide/instances#subscribing-a-device)
+with the `sandbox` toggle, so the same credentials serve both environments.
 
 ```sh
 export PUSHPORT_TOKEN="pat_..."   # app token
@@ -53,8 +57,7 @@ pushport creds set apns \
   --key-p8 @AuthKey_AB12CD34.p8 \
   --key-id AB12CD34 \
   --team-id TEAM1234 \
-  --topic com.example.myapp \
-  --production
+  --topic com.example.myapp
 
 # FCM (project id is derived from the service-account JSON)
 pushport creds set fcm \

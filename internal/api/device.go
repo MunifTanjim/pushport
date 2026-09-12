@@ -58,6 +58,7 @@ func (h *DeviceHandler) subscribe(w http.ResponseWriter, r *http.Request) {
 		Transport string  `json:"transport"`
 		Token     string  `json:"token"`
 		TTL       *string `json:"ttl"`
+		Sandbox   bool    `json:"sandbox"`
 	}
 	if err := ReadRequestBodyJSON(w, r, &body, 16<<10); err != nil {
 		SendError(w, r, err)
@@ -90,11 +91,14 @@ func (h *DeviceHandler) subscribe(w http.ResponseWriter, r *http.Request) {
 		ttl = d
 	}
 	exp := time.Now().Add(ttl).Unix()
+	// Sandbox is only meaningful for APNs; seal it into the endpoint so the
+	// environment is fixed per subscription (defaults to production).
 	token, err := h.seal.Seal(r.Context(), appID, seal.Payload{
 		Transport:    body.Transport,
 		TransportRef: body.Token,
 		Exp:          exp,
 		JTI:          id.New(),
+		Sandbox:      body.Sandbox && body.Transport == "apns",
 	})
 	if err != nil {
 		SendError(w, r, ErrorInternalServerError().WithCause(err))

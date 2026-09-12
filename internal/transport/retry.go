@@ -7,7 +7,7 @@ import (
 )
 
 type TenantSender interface {
-	Send(ctx context.Context, tenantID, transportName, transportRef string, msg Message) (Result, error)
+	Send(ctx context.Context, tenantID, transportName, transportRef string, opts SendOptions, msg Message) (Result, error)
 }
 
 type RetryConfigProvider interface {
@@ -54,7 +54,7 @@ func transient(res Result, err error) bool {
 	return res.Retryable || res.RetryAfter > 0 || res.StatusCode == 429 || res.StatusCode >= 500
 }
 
-func (r *RetryingSender) Send(ctx context.Context, tenantID, transportName, transportRef string, msg Message) (Result, error) {
+func (r *RetryingSender) Send(ctx context.Context, tenantID, transportName, transportRef string, opts SendOptions, msg Message) (Result, error) {
 	maxAttempts, base, max := r.cfg.RetryConfig(ctx)
 	if maxAttempts < 1 {
 		maxAttempts = 1
@@ -62,7 +62,7 @@ func (r *RetryingSender) Send(ctx context.Context, tenantID, transportName, tran
 	var res Result
 	var err error
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
-		res, err = r.inner.Send(ctx, tenantID, transportName, transportRef, msg)
+		res, err = r.inner.Send(ctx, tenantID, transportName, transportRef, opts, msg)
 		if !transient(res, err) || attempt == maxAttempts {
 			return res, err
 		}

@@ -156,7 +156,7 @@ func TestAdminSetCredentials(t *testing.T) {
 		return resp.StatusCode
 	}
 
-	apns := `{"key_p8":"PEM","key_id":"K1","team_id":"T1","topic":"com.x","production":true}`
+	apns := `{"key_p8":"PEM","key_id":"K1","team_id":"T1","topic":"com.x"}`
 	if s := do("PUT", "/apps/"+id+"/creds/apns", apns); s != http.StatusNoContent {
 		t.Fatalf("set apns: status=%d", s)
 	}
@@ -305,7 +305,7 @@ func TestAppSelfManagement(t *testing.T) {
 	id, _, appToken := createAppAdmin(t, srv, `{"name":"selfmgmt"}`)
 
 	t.Run("credentials with app token", func(t *testing.T) {
-		body := `{"key_p8":"PEM","key_id":"K1","team_id":"T1","topic":"com.x","production":true}`
+		body := `{"key_p8":"PEM","key_id":"K1","team_id":"T1","topic":"com.x"}`
 		resp, err := c.Do(jsonReq(t, "PUT", srv.URL+"/apps/"+id+"/creds/apns", "Bearer "+appToken, body))
 		if err != nil || resp.StatusCode != http.StatusNoContent {
 			t.Fatalf("set creds with app token: err=%v status=%d", err, resp.StatusCode)

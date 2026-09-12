@@ -657,7 +657,6 @@ function ApnsCard({
     key_id: "",
     team_id: "",
     topic: "",
-    production: false,
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -721,11 +720,6 @@ function ApnsCard({
             onChange={(e) => setForm({ ...form, topic: e.target.value })}
           />
         </Field>
-        <Toggle
-          checked={form.production}
-          onChange={(v) => setForm({ ...form, production: v })}
-          label="production"
-        />
         {error && <ErrorNote text={error} />}
         <Btn type="submit" variant="cyan" disabled={putM.isPending}>
           save credentials

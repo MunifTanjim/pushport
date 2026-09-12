@@ -40,7 +40,7 @@ func TestAPNsSendSuccess(t *testing.T) {
 	}))
 	t.Cleanup(srv.Close)
 
-	tr, err := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.example.app"}, srv.URL, srv.Client())
+	tr, err := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.example.app"}, srv.URL, false, srv.Client())
 	if err != nil {
 		t.Fatalf("new: %v", err)
 	}
@@ -75,7 +75,7 @@ func TestAPNsGoneIsPermanent(t *testing.T) {
 		_, _ = w.Write([]byte(`{"reason":"Unregistered"}`))
 	}))
 	t.Cleanup(srv.Close)
-	tr, _ := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.x"}, srv.URL, srv.Client())
+	tr, _ := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.x"}, srv.URL, false, srv.Client())
 	res, err := tr.Send(context.Background(), "dead", Message{Ciphertext: []byte("x")})
 	if err != nil {
 		t.Fatalf("send: %v", err)
@@ -117,7 +117,7 @@ func TestAPNsExpiredProviderTokenRetriesAndInvalidatesJWT(t *testing.T) {
 		_, _ = w.Write([]byte(`{"reason":"ExpiredProviderToken"}`))
 	}))
 	t.Cleanup(srv.Close)
-	tr, _ := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.x"}, srv.URL, srv.Client())
+	tr, _ := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.x"}, srv.URL, false, srv.Client())
 	res, err := tr.Send(context.Background(), "dev", Message{Ciphertext: []byte("x")})
 	if err != nil {
 		t.Fatalf("send: %v", err)
@@ -139,7 +139,7 @@ func TestAPNsInvalidProviderTokenNotRetryableButInvalidatesJWT(t *testing.T) {
 		_, _ = w.Write([]byte(`{"reason":"InvalidProviderToken"}`))
 	}))
 	t.Cleanup(srv.Close)
-	tr, _ := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.x"}, srv.URL, srv.Client())
+	tr, _ := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.x"}, srv.URL, false, srv.Client())
 	res, _ := tr.Send(context.Background(), "dev", Message{Ciphertext: []byte("x")})
 	if res.StatusCode != http.StatusForbidden || res.Retryable {
 		t.Fatalf("invalid provider token should not be retryable, got %+v", res)
@@ -158,12 +158,31 @@ func TestAPNsBadDeviceTokenIsPermanent(t *testing.T) {
 		_, _ = w.Write([]byte(`{"reason":"BadDeviceToken"}`))
 	}))
 	t.Cleanup(srv.Close)
-	tr, _ := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.x"}, srv.URL, srv.Client())
+	tr, _ := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.x"}, srv.URL, false, srv.Client())
 	res, err := tr.Send(context.Background(), "badtoken", Message{Ciphertext: []byte("x")})
 	if err != nil {
 		t.Fatalf("send: %v", err)
 	}
 	if !res.Permanent || res.StatusCode != http.StatusBadRequest {
 		t.Fatalf("expected permanent 400, got %+v", res)
+	}
+}
+
+func TestAPNsSandboxSelectsEnvironment(t *testing.T) {
+	// Both hosts map to the test server via baseURL override; the point is that
+	// the sandbox flag still picks the default hosts when baseURL is empty.
+	prod, err := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.x"}, "", false, http.DefaultClient)
+	if err != nil {
+		t.Fatalf("prod: %v", err)
+	}
+	sandbox, err := NewAPNs(app.APNsCreds{KeyP8: testP8(t), KeyID: "K1", TeamID: "T1", Topic: "com.x"}, "", true, http.DefaultClient)
+	if err != nil {
+		t.Fatalf("sandbox: %v", err)
+	}
+	if prod.baseURL != "https://api.push.apple.com" {
+		t.Fatalf("prod host: %s", prod.baseURL)
+	}
+	if sandbox.baseURL != "https://api.sandbox.push.apple.com" {
+		t.Fatalf("sandbox host: %s", sandbox.baseURL)
 	}
 }

@@ -29,15 +29,14 @@ type APNs struct {
 	jwtAt time.Time
 }
 
-func NewAPNs(creds app.APNsCreds, baseURL string, client *http.Client) (*APNs, error) {
+func NewAPNs(creds app.APNsCreds, baseURL string, sandbox bool, client *http.Client) (*APNs, error) {
 	key, err := crypto.ParseP8(creds.KeyP8)
 	if err != nil {
 		return nil, err
 	}
 	if baseURL == "" {
-		if creds.Production {
-			baseURL = "https://api.push.apple.com"
-		} else {
+		baseURL = "https://api.push.apple.com"
+		if sandbox {
 			baseURL = "https://api.sandbox.push.apple.com"
 		}
 	}

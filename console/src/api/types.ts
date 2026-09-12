@@ -96,7 +96,6 @@ export interface ApnsCreds {
   key_id: string;
   team_id: string;
   topic: string;
-  production: boolean;
 }
 
 export interface FcmCreds {

@@ -40,7 +40,7 @@ func TestCredentialsRoundTrip(t *testing.T) {
 		t.Fatalf("expected empty credentials, got %+v", got)
 	}
 
-	if err := svc.SetAPNsCredentials(ctx, tid, APNsCreds{KeyP8: "PEM", KeyID: "K1", TeamID: "T1", Topic: "com.example.app", Production: true}); err != nil {
+	if err := svc.SetAPNsCredentials(ctx, tid, APNsCreds{KeyP8: "PEM", KeyID: "K1", TeamID: "T1", Topic: "com.example.app"}); err != nil {
 		t.Fatalf("set apns: %v", err)
 	}
 	if err := svc.SetWebPushCredentials(ctx, tid, WebPushCreds{VAPIDPrivateKey: "priv", Subject: "mailto:a@b.c"}); err != nil {
@@ -50,7 +50,7 @@ func TestCredentialsRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get: %v", err)
 	}
-	if got.APNs == nil || got.APNs.KeyID != "K1" || !got.APNs.Production {
+	if got.APNs == nil || got.APNs.KeyID != "K1" {
 		t.Fatalf("apns not round-tripped: %+v", got.APNs)
 	}
 	if got.WebPush == nil || got.WebPush.Subject != "mailto:a@b.c" {

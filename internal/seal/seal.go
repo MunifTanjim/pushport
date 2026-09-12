@@ -23,6 +23,7 @@ type Payload struct {
 	TransportRef string `json:"r"`
 	Exp          int64  `json:"e"`
 	JTI          string `json:"j"`
+	Sandbox      bool   `json:"sb,omitempty"`
 }
 
 type Service struct{ apps *app.Service }

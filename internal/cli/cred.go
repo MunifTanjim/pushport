@@ -55,7 +55,6 @@ func credsSetCmd() *cobra.Command {
 
 func credsSetApnsCmd() *cobra.Command {
 	var keyP8, keyID, teamID, topic string
-	var production bool
 	cmd := &cobra.Command{
 		Use: "apns", Short: "Set APNs credentials", Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -66,7 +65,7 @@ func credsSetApnsCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			body := map[string]any{"key_p8": p8, "key_id": keyID, "team_id": teamID, "topic": topic, "production": production}
+			body := map[string]any{"key_p8": p8, "key_id": keyID, "team_id": teamID, "topic": topic}
 			data, err := newClient().Do(ctx(), "PUT", appPath("/creds/apns"), body)
 			if err != nil {
 				return err
@@ -79,7 +78,6 @@ func credsSetApnsCmd() *cobra.Command {
 	f.StringVar(&keyID, "key-id", "", "APNs key id")
 	f.StringVar(&teamID, "team-id", "", "Apple team id")
 	f.StringVar(&topic, "topic", "", "APNs topic (bundle id)")
-	f.BoolVar(&production, "production", false, "use the APNs production environment (default sandbox)")
 	for _, n := range []string{"key-p8", "key-id", "team-id", "topic"} {
 		_ = cmd.MarkFlagRequired(n)
 	}

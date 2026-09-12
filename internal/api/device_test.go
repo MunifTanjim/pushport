@@ -60,6 +60,42 @@ func TestSubscribeMintsRoundTrippableEndpoint(t *testing.T) {
 	if err != nil || gotApp != a.ID || p.Transport != "apns" || p.TransportRef != "devtoken" {
 		t.Fatalf("open minted token: app=%s payload=%+v err=%v", gotApp, p, err)
 	}
+	if p.Sandbox {
+		t.Fatal("default subscribe should not set sandbox")
+	}
+}
+
+func TestSubscribeSandboxToggle(t *testing.T) {
+	srv, appSvc, sealSvc := newDeviceServer(t)
+	a, _ := appSvc.Create(nil_ctx(), "app")
+
+	post := func(body string) seal.Payload {
+		t.Helper()
+		resp, err := http.Post(srv.URL+"/apps/"+a.ID+"/subscribe", "application/json", strings.NewReader(body))
+		if err != nil || resp.StatusCode != http.StatusCreated {
+			t.Fatalf("subscribe %s: err=%v status=%d", body, err, resp.StatusCode)
+		}
+		var out struct {
+			Endpoint string `json:"endpoint"`
+		}
+		dataOf(t, resp, &out)
+		_, p, err := sealSvc.Open(nil_ctx(), strings.TrimPrefix(out.Endpoint, "http://relay.test/push/"))
+		if err != nil {
+			t.Fatalf("open: %v", err)
+		}
+		return p
+	}
+
+	if p := post(`{"transport":"apns","token":"t1","sandbox":true}`); !p.Sandbox {
+		t.Fatal("sandbox=true should be sealed into the endpoint")
+	}
+	// sandbox is APNs-only; it must not leak into other transports
+	if p := post(`{"transport":"fcm","token":"t2","sandbox":true}`); p.Sandbox {
+		t.Fatal("sandbox must be ignored for non-apns transports")
+	}
+	if p := post(`{"transport":"webpush","token":"t3","sandbox":true}`); p.Sandbox {
+		t.Fatal("sandbox must be ignored for non-apns transports")
+	}
 }
 
 func TestSubscribeUnknownApp404(t *testing.T) {

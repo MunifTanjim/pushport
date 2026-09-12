@@ -21,11 +21,10 @@ type Credentials struct {
 }
 
 type APNsCreds struct {
-	KeyP8      string `json:"key_p8"`
-	KeyID      string `json:"key_id"`
-	TeamID     string `json:"team_id"`
-	Topic      string `json:"topic"`
-	Production bool   `json:"production"`
+	KeyP8  string `json:"key_p8"`
+	KeyID  string `json:"key_id"`
+	TeamID string `json:"team_id"`
+	Topic  string `json:"topic"`
 }
 
 type FCMCreds struct {

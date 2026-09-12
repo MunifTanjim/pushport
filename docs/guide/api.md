@@ -96,6 +96,7 @@ rate-limited per app (the app's subscribe limit applies).
 | `transport` | yes      | `apns`, `fcm`, or `webpush`.                                                                                                        |
 | `token`     | yes      | The device's native token: APNs/FCM registration token, or the WebPush subscription endpoint URL.                                   |
 | `ttl`       | no       | Endpoint lifetime as a Go duration string (e.g. `360h`). Clamped to 12h–45d; defaults to the server's `PUSHPORT_PUSH_ENDPOINT_TTL`. |
+| `sandbox`   | no       | APNs only. `true` routes the endpoint through the APNs sandbox environment; defaults to `false` (production).                       |
 
 **Success:** `201 Created`:
 

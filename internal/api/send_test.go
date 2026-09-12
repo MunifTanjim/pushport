@@ -22,15 +22,21 @@ type fakeSender struct {
 	err                  error
 	called               bool
 	gotTransport, gotRef string
+	gotSandbox           bool
 }
 
-func (f *fakeSender) Send(_ context.Context, _, transportName, transportRef string, _ transport.Message) (transport.Result, error) {
+func (f *fakeSender) Send(_ context.Context, _, transportName, transportRef string, opts transport.SendOptions, _ transport.Message) (transport.Result, error) {
 	f.called = true
-	f.gotTransport, f.gotRef = transportName, transportRef
+	f.gotTransport, f.gotRef, f.gotSandbox = transportName, transportRef, opts.Sandbox
 	return f.res, f.err
 }
 
 func newSendFixture(t *testing.T, sender Sender) (*httptest.Server, string, string) {
+	t.Helper()
+	return newSendFixtureWithPayload(t, sender, seal.Payload{})
+}
+
+func newSendFixtureWithPayload(t *testing.T, sender Sender, extra seal.Payload) (*httptest.Server, string, string) {
 	t.Helper()
 	d, err := db.Open(":memory:")
 	if err != nil {
@@ -45,15 +51,38 @@ func newSendFixture(t *testing.T, sender Sender) (*httptest.Server, string, stri
 	instances := instance.NewService(d.Queries, kr)
 	rawKey, _, _ := instances.Issue(context.Background(), tn.ID, "srv")
 	sealSvc := seal.NewService(tsvc)
-	endpoint, _ := sealSvc.Seal(context.Background(), tn.ID, seal.Payload{
+	p := seal.Payload{
 		Transport: "apns", TransportRef: "devtoken", Exp: time.Now().Add(time.Hour).Unix(), JTI: "j1",
-	})
+	}
+	p.Transport = cmpOr(p.Transport, extra.Transport)
+	p.TransportRef = cmpOr(p.TransportRef, extra.TransportRef)
+	p.Sandbox = p.Sandbox || extra.Sandbox
+	endpoint, _ := sealSvc.Seal(context.Background(), tn.ID, p)
 	h := NewSendHandler(instances, sealSvc, sender, 4096)
 	mux := http.NewServeMux()
 	h.Routes(mux)
 	srv := httptest.NewServer(WithRequestID(mux))
 	t.Cleanup(srv.Close)
 	return srv, rawKey, endpoint
+}
+
+func cmpOr(a, b string) string {
+	if a != "" {
+		return a
+	}
+	return b
+}
+
+func TestSendPassesSandboxOption(t *testing.T) {
+	sender := &fakeSender{res: transport.Result{Delivered: true, StatusCode: 200}}
+	srv, key, endpoint := newSendFixtureWithPayload(t, sender, seal.Payload{Sandbox: true})
+	resp := post(t, srv, endpoint, key, "ciphertext")
+	if resp.StatusCode != http.StatusAccepted {
+		t.Fatalf("want 202, got %d", resp.StatusCode)
+	}
+	if !sender.called || !sender.gotSandbox {
+		t.Fatalf("sandbox option not passed through: %+v", sender)
+	}
 }
 
 func post(t *testing.T, srv *httptest.Server, token, authKey, body string) *http.Response {
@@ -235,7 +264,7 @@ func TestSendRateLimited429(t *testing.T) {
 
 type credErrSender struct{}
 
-func (credErrSender) Send(_ context.Context, _, _, _ string, _ transport.Message) (transport.Result, error) {
+func (credErrSender) Send(_ context.Context, _, _, _ string, _ transport.SendOptions, _ transport.Message) (transport.Result, error) {
 	return transport.Result{}, transport.ErrCredentialsInvalid
 }
 

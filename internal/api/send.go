@@ -17,7 +17,7 @@ import (
 )
 
 type Sender interface {
-	Send(ctx context.Context, appID, transportName, transportRef string, msg transport.Message) (transport.Result, error)
+	Send(ctx context.Context, appID, transportName, transportRef string, opts transport.SendOptions, msg transport.Message) (transport.Result, error)
 }
 
 type Admitter interface {
@@ -119,7 +119,7 @@ func (h *SendHandler) send(w http.ResponseWriter, r *http.Request) {
 		Topic:      r.Header.Get("Topic"),
 	}
 
-	res, err := h.sender.Send(r.Context(), tokenApp, payload.Transport, payload.TransportRef, msg)
+	res, err := h.sender.Send(r.Context(), tokenApp, payload.Transport, payload.TransportRef, transport.SendOptions{Sandbox: payload.Sandbox}, msg)
 	if err != nil {
 		switch {
 		case errors.Is(err, transport.ErrNotConfigured):

@@ -67,6 +67,11 @@ Content-Type: application/json
   Push API subscription.
 - `ttl` is optional (a Go duration string). Default and bounds come from the
   relay config: default 15 days, clamped to 12 hours to 45 days.
+- `sandbox` is optional (APNs only). Set it to `true` to route this endpoint
+  through the APNs **sandbox** environment; the default is `false`
+  (production). The flag is sealed into the endpoint, so it's fixed for the
+  endpoint's lifetime. Sandbox builds of your app should subscribe with
+  `sandbox: true`.
 
 The response:
 
